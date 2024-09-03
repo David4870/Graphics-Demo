@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.30.2)
 project(Graphics-Demo)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+endif()
+
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(ARCHITECTURE x64)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -11,14 +15,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${ARCHITECTURE}
 file(GLOB_RECURSE PRJ_SOURCE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME} ${PRJ_SOURCE})
 
-# SDL config
+# # SDL config
 set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
 set(SDL_TEST_LIBRARIES OFF)
 set(SDL_TESTS ${SDL_TEST_LIBRARIES})
 set(SDL_TEST_LIBRARY ${SDL_TEST_LIBRARIES})
 
-# Provide dependencies
+# # Provide dependencies
 include(FetchContent)
 
 FetchContent_Declare(
@@ -44,7 +48,7 @@ FetchContent_MakeAvailable(SDL3 GLEW IMGUI)
 
 find_package(OpenGL REQUIRED)
 
-# GLEW config
+# # GLEW config
 set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
 set(GLEW_LIB_DIR ${glew_SOURCE_DIR}/lib/Release/x64)
 set(GLEW_BIN_DIR ${glew_SOURCE_DIR}/bin/Release/x64)
