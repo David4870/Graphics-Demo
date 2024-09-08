@@ -29,13 +29,12 @@ FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG        062caeaa4b7ab05ed852121271b35205a9b9721c
-    FIND_PACKAGE_ARGS
 )
 
 FetchContent_Declare(
     GLEW
-    URL https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download
-    URL_HASH SHA256=80cfc88fd295426b49001a9dc521da793f8547ac10aebfc8bdc91ddc06c5566c
+    URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
+    URL_HASH SHA256=A9046A913774395A095EDCC0B0AC2D81C3AACCA61787B39839B941E9BE14E0D4
 )
 
 FetchContent_Declare(
@@ -46,25 +45,9 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3 GLEW IMGUI)
 
+add_subdirectory(${glew_SOURCE_DIR}/build/cmake)
+
 find_package(OpenGL REQUIRED)
-
-# # GLEW config
-set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
-set(GLEW_LIB_DIR ${glew_SOURCE_DIR}/lib/Release/x64)
-set(GLEW_BIN_DIR ${glew_SOURCE_DIR}/bin/Release/x64)
-
-add_library(GLEW::GLEW-static STATIC IMPORTED)
-set_target_properties(GLEW::GLEW-static PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${GLEW_INCLUDE_DIR}
-    IMPORTED_LOCATION ${GLEW_LIB_DIR}/glew32s.lib
-)
-
-add_library(GLEW::GLEW SHARED IMPORTED)
-set_target_properties(GLEW::GLEW PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${GLEW_INCLUDE_DIR}
-    IMPORTED_LOCATION ${GLEW_BIN_DIR}/glew32.dll
-    IMPORTED_IMPLIB ${GLEW_LIB_DIR}/glew32.lib
-)
 
 add_library(IMGUI STATIC
    ${imgui_SOURCE_DIR}/imgui.cpp
@@ -81,11 +64,13 @@ target_include_directories(IMGUI PUBLIC
     ${imgui_SOURCE_DIR}/backends
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
+
 # Linking
 target_link_libraries(IMGUI PRIVATE SDL3::SDL3-static)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3-static
-    GLEW::GLEW-static
-    OPENGL32
+    glew_s
+    ${OPENGL_gl_LIBRARY}
     IMGUI
 )
