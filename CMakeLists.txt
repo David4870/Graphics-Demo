@@ -15,14 +15,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${ARCHITECTURE}
 file(GLOB_RECURSE PRJ_SOURCE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME} ${PRJ_SOURCE})
 
-# # SDL config
+# SDL config
 set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
 set(SDL_TEST_LIBRARIES OFF)
 set(SDL_TESTS ${SDL_TEST_LIBRARIES})
 set(SDL_TEST_LIBRARY ${SDL_TEST_LIBRARIES})
 
-# # Provide dependencies
+# OpenGL config
+if(UNIX)
+    cmake_policy(SET CMP0072 NEW)
+    set(OpenGL_GL_PREFERENCE LEGACY)
+endif()
+
+# Provide dependencies
 include(FetchContent)
 
 FetchContent_Declare(
@@ -71,6 +77,6 @@ target_link_libraries(IMGUI PRIVATE SDL3::SDL3-static)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3-static
     glew_s
-    ${OPENGL_gl_LIBRARY}
+    OpenGL::GL
     IMGUI
 )
