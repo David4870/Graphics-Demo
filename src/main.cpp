@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 
     while (running)
     {
-        while (SDL_PollEvent(&e))     
+        while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_EVENT_QUIT || (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_ESCAPE))
                 running = false;
@@ -61,7 +61,7 @@ void getSDLVersion()
             SDL_VERSIONNUM_MINOR(compiled),
             SDL_VERSIONNUM_MICRO(compiled));
 
-    SDL_Log("========== Linking  against SDL version %d.%d.%d =========\n\n",
+    SDL_Log("========== Linking  against SDL version %d.%d.%d ==========\n\n",
             SDL_VERSIONNUM_MAJOR(linked),
             SDL_VERSIONNUM_MINOR(linked),
             SDL_VERSIONNUM_MICRO(linked));
