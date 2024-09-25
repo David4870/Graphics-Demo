@@ -18,7 +18,7 @@ add_executable(${PROJECT_NAME} ${PRJ_SOURCE})
 set(BUILD_SHARED_LIBS OFF)
 
 if(BUILD_SHARED_LIBS)
-    set(MY_LIBRARIES SDL3::SDL3 glew OpenGL::GL)
+    set(MY_LIBRARIES SDL3::SDL3-shared glew OpenGL::GL)
     set(SDL_STATIC OFF)
     set(SDL_SHARED ON)
 else()
