@@ -55,7 +55,7 @@ add_subdirectory(${glew_SOURCE_DIR}/build/cmake)
 
 find_package(OpenGL REQUIRED)
 
-add_library(IMGUI STATIC
+target_sources(${PROJECT_NAME} PRIVATE
    ${imgui_SOURCE_DIR}/imgui.cpp
    ${imgui_SOURCE_DIR}/imgui_demo.cpp
    ${imgui_SOURCE_DIR}/imgui_draw.cpp
@@ -65,7 +65,7 @@ add_library(IMGUI STATIC
    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp 
 )
 
-target_include_directories(IMGUI PUBLIC
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${imgui_SOURCE_DIR} 
     ${imgui_SOURCE_DIR}/backends
 )
@@ -73,10 +73,8 @@ target_include_directories(IMGUI PUBLIC
 target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
 
 # Linking
-target_link_libraries(IMGUI PRIVATE SDL3::SDL3-static)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3-static
     glew_s
     OpenGL::GL
-    IMGUI
 )
