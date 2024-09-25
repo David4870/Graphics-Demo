@@ -18,11 +18,11 @@ add_executable(${PROJECT_NAME} ${PRJ_SOURCE})
 set(BUILD_SHARED_LIBS OFF)
 
 if(BUILD_SHARED_LIBS)
-    set(MY_LIBRARIES SDL3::SDL3-shared glew OpenGL::GL)
+    set(MY_LIBRARIES SDL3::SDL3-shared GLEW::GLEW-shared OpenGL::GL)
     set(SDL_STATIC OFF)
     set(SDL_SHARED ON)
 else()
-    set(MY_LIBRARIES SDL3::SDL3-static glew_s OpenGL::GL)
+    set(MY_LIBRARIES SDL3::SDL3-static GLEW::GLEW-static OpenGL::GL)
     set(SDL_STATIC ON)
     set(SDL_SHARED OFF)
 endif()
@@ -60,6 +60,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL3 GLEW IMGUI)
 
 add_subdirectory(${glew_SOURCE_DIR}/build/cmake)
+
+add_library(GLEW::GLEW-shared ALIAS glew)
+add_library(GLEW::GLEW-static ALIAS glew_s)
 
 find_package(OpenGL REQUIRED)
 
