@@ -18,11 +18,11 @@ add_executable(${PROJECT_NAME} ${PRJ_SOURCE})
 set(BUILD_SHARED_LIBS OFF)
 
 if(BUILD_SHARED_LIBS)
-    set(MY_LIBRARIES SDL3::SDL3-shared GLEW::GLEW-shared OpenGL::GL)
+    set(PROJECT_LIBRARIES SDL3::SDL3-shared GLEW::GLEW-shared OpenGL::GL)
     set(SDL_STATIC OFF)
     set(SDL_SHARED ON)
 else()
-    set(MY_LIBRARIES SDL3::SDL3-static GLEW::GLEW-static OpenGL::GL)
+    set(PROJECT_LIBRARIES SDL3::SDL3-static GLEW::GLEW-static OpenGL::GL)
     set(SDL_STATIC ON)
     set(SDL_SHARED OFF)
 endif()
@@ -84,4 +84,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
 
 # Linking
-target_link_libraries(${PROJECT_NAME} PRIVATE ${MY_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_LIBRARIES})
