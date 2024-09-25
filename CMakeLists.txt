@@ -15,9 +15,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${ARCHITECTURE}
 file(GLOB_RECURSE PRJ_SOURCE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME} ${PRJ_SOURCE})
 
-# SDL config
-set(SDL_STATIC ON)
-set(SDL_SHARED OFF)
+set(BUILD_SHARED_LIBS OFF)
+
+if(BUILD_SHARED_LIBS)
+    set(MY_LIBRARIES SDL3::SDL3-shared glew OpenGL::GL)
+    set(SDL_STATIC OFF)
+    set(SDL_SHARED ON)
+else()
+    set(MY_LIBRARIES SDL3::SDL3-static glew_s OpenGL::GL)
+    set(SDL_STATIC ON)
+    set(SDL_SHARED OFF)
+endif()
 set(SDL_TEST_LIBRARIES OFF)
 set(SDL_TESTS ${SDL_TEST_LIBRARIES})
 set(SDL_TEST_LIBRARY ${SDL_TEST_LIBRARIES})
@@ -73,8 +81,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
 
 # Linking
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    SDL3::SDL3-static
-    glew_s
-    OpenGL::GL
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${MY_LIBRARIES})
