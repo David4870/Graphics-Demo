@@ -2,11 +2,11 @@
 
 #include <SDL3/SDL.h>
 
-class Game
+class App
 {
 public:
-    Game();
-    ~Game();
+    App();
+    ~App();
     void run();
 
 private:

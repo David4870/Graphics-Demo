@@ -4,19 +4,19 @@
 #include <GL/glew.h>
 
 #include "appContext.hpp"
-#include "game.hpp"
+#include "app.hpp"
 
-Game::Game()
+App::App()
 {
     initialize();
 }
 
-Game::~Game()
+App::~App()
 {
     quit();
 }
 
-void Game::initialize()
+void App::initialize()
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -41,7 +41,7 @@ void Game::initialize()
     }
 }
 
-void Game::processEvents()
+void App::processEvents()
 {
     using namespace context;
     
@@ -52,7 +52,7 @@ void Game::processEvents()
     }
 }
 
-void Game::run()
+void App::run()
 {
     while (context::running)
     {
@@ -71,7 +71,7 @@ void Game::run()
     }
 }
 
-void Game::quit()
+void App::quit()
 {
     SDL_GL_DestroyContext(glContext);
     SDL_DestroyWindow(context::window);
