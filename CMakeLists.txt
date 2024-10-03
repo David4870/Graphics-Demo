@@ -87,6 +87,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 # Linking
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_LIBRARIES})
