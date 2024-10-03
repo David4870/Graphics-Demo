@@ -3,15 +3,15 @@
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
 
-#include "game.hpp"
+#include "app.hpp"
 #include "versionUtils.hpp"
 
 int main(int argc, char* argv[])
 {
     getSDLVersion();
 
-    Game game;
-    game.run();
+    App app;
+    app.run();
 
     return 0;
 }
