@@ -12,19 +12,6 @@
 #include "appContext.hpp"
 #include "app.hpp"
 
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "uniform vec4 ourColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = ourColor;\n"
-    "}\n\0";
 
 App::App()
 {
@@ -76,19 +63,32 @@ void App::processEvents()
 void App::run()
 {
     using namespace context;
-    // GL 3.0 + GLSL 130
-    const char *glsl_version = "#version 130";
+
+    const char *glsl_version = "#version 330";
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     // Create window with graphics context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_MakeCurrent(window, glContext);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    const char *vertexShaderSource = "#version 330 core\n"
+                                     "layout (location = 0) in vec3 aPos;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                     "}\0";
+    const char *fragmentShaderSource = "#version 330 core\n"
+                                       "out vec4 FragColor;\n"
+                                       "uniform vec4 ourColor;\n"
+                                       "void main()\n"
+                                       "{\n"
+                                       "   FragColor = ourColor;\n"
+                                       "}\n\0";
 
     // build and compile our shader program
     // ------------------------------------
@@ -185,7 +185,6 @@ void App::run()
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Our state
-    bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
@@ -202,12 +201,6 @@ void App::run()
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        // UI Start
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
             ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
