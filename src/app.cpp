@@ -1,6 +1,8 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <vector>
+#include <cmath>
 
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
@@ -12,6 +14,9 @@
 #include "appContext.hpp"
 #include "app.hpp"
 
+
+std::vector<float> vertices;
+std::vector<int> indices;
 
 App::App()
 {
@@ -58,6 +63,36 @@ void App::processEvents()
         if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE))
             running = false;
     }
+}
+
+std::pair<std::vector<float>, std::vector<int>> regularPolygon(float n, float a, float b, float r)
+{
+    std::vector<float> vertices;
+    std::vector<int> indices;
+    std::pair<std::vector<float>, std::vector<int>> tuple;
+    float theta = M_PI/2;
+    float dTheta = 2*M_PI/n;
+
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    for(int i = 0; i < n; i++)
+    {
+        theta += dTheta;
+        vertices.push_back(a + r*cos(theta));
+        vertices.push_back(b + r*sin(theta));
+        vertices.push_back(0.0f);
+    }
+
+    for(int i = 0; i < n; i++)
+    {
+        indices.push_back(0);
+        indices.push_back(i+1);
+        indices.push_back(i+2);
+    }
+    indices[indices.size()-1] = 1;
+
+    return std::make_pair(vertices, indices);
 }
 
 void App::run()
@@ -130,20 +165,17 @@ void App::run()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    float vertices[] = {
-         0.0,   0.75, 0.0f,  // top middle
-         0.75f,  0.5f, 0.0f,  // top right
-        -0.75f,  0.5f, 0.0f,  // top left
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-    };
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 3, 4,  // middle triangle
-        0, 4, 2,  // left triangle
-        0, 1, 3  // right triangle
-    };
+    std::vector<float> tmpVertices;
+    std::vector<int> tmpIndices;
+
+    tie(tmpVertices, tmpIndices) = regularPolygon(6.0f, 0.0f, 0.0f, 0.75f);
+
+    float vertices[tmpVertices.size()];
+    int indices[tmpIndices.size()];
+
+    copy(tmpVertices.begin(), tmpVertices.end(), vertices);
+    copy(tmpIndices.begin(), tmpIndices.end(), indices);
+
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -285,7 +317,7 @@ void App::run()
         glUniform4f(vertexColorLocation, color.x, color.y, color.z, color.w);
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, tmpIndices.size(), GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
