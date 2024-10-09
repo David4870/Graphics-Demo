@@ -9,4 +9,5 @@ namespace context
     inline bool running = true;
     inline SDL_Event event;
     inline SDL_Window *window;
+    inline SDL_GLContext glContext;
 }

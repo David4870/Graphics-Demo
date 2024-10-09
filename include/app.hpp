@@ -13,7 +13,4 @@ private:
     void initialize();
     void processEvents();
     void quit();
-
-private:
-    SDL_GLContext glContext;
 };
