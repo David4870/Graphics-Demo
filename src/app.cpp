@@ -69,7 +69,6 @@ std::pair<std::vector<float>, std::vector<int>> regularPolygon(float n, float a,
 {
     std::vector<float> vertices;
     std::vector<int> indices;
-    std::pair<std::vector<float>, std::vector<int>> tuple;
     float theta = M_PI/2;
     float dTheta = 2*M_PI/n;
 
