@@ -1,22 +1,15 @@
-
-#include <stdio.h>
 #include <iostream>
-#include <vector>
-#include <cmath>
 
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
 
-#include "imgui.h"
-#include "imgui_impl_sdl3.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_opengl3.h>
 
-#include "appContext.hpp"
 #include "app.hpp"
-
-
-std::vector<float> vertices;
-std::vector<int> indices;
+#include "appContext.hpp"
+#include "polygon.hpp"
 
 App::App()
 {
@@ -63,35 +56,6 @@ void App::processEvents()
         if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE))
             running = false;
     }
-}
-
-std::pair<std::vector<float>, std::vector<int>> regularPolygon(float n, float a, float b, float r)
-{
-    std::vector<float> vertices;
-    std::vector<int> indices;
-    float theta = M_PI/2;
-    float dTheta = 2*M_PI/n;
-
-    vertices.push_back(0.0f);
-    vertices.push_back(0.0f);
-    vertices.push_back(0.0f);
-    for(int i = 0; i < n; i++)
-    {
-        theta += dTheta;
-        vertices.push_back(a + r*cos(theta));
-        vertices.push_back(b + r*sin(theta));
-        vertices.push_back(0.0f);
-    }
-
-    for(int i = 0; i < n; i++)
-    {
-        indices.push_back(0);
-        indices.push_back(i+1);
-        indices.push_back(i+2);
-    }
-    indices[indices.size()-1] = 1;
-
-    return std::make_pair(vertices, indices);
 }
 
 void App::run()
@@ -164,16 +128,13 @@ void App::run()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    std::vector<float> tmpVertices;
-    std::vector<int> tmpIndices;
+    Polygon hexagon = polygonCreate(6.0f, 0.0f, 0.0f, 0.75f);
 
-    tie(tmpVertices, tmpIndices) = regularPolygon(6.0f, 0.0f, 0.0f, 0.75f);
+    float vertices[hexagon.vertices.size()];
+    unsigned int indices[hexagon.indices.size()];
 
-    float vertices[tmpVertices.size()];
-    int indices[tmpIndices.size()];
-
-    copy(tmpVertices.begin(), tmpVertices.end(), vertices);
-    copy(tmpIndices.begin(), tmpIndices.end(), indices);
+    copy(hexagon.vertices.begin(), hexagon.vertices.end(), vertices);
+    copy(hexagon.indices.begin(), hexagon.indices.end(), indices);
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -219,9 +180,6 @@ void App::run()
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
-
-    bool running = true;
-    SDL_Event event;
 
     while (context::running)
     {
@@ -300,13 +258,12 @@ void App::run()
             }
             ImGui::End();
         }
-
         // UI End
 
         // Rendering
         ImGui::Render();
         /// glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-        glViewport(400, 0, 1520, 1080);
+        glViewport(400, 0, WINDOW_WIDTH - 400, 1080);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -316,7 +273,7 @@ void App::run()
         glUniform4f(vertexColorLocation, color.x, color.y, color.z, color.w);
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawElements(GL_TRIANGLES, tmpIndices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, hexagon.indices.size(), GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
