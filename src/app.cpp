@@ -74,6 +74,9 @@ void App::run()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
+    const char *items[] = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
+    static int item_selected_index = 0; // Here we store our selection data as an index.
+
     const char *vertexShaderSource = "#version 330 core\n"
                                      "layout (location = 0) in vec3 aPos;\n"
                                      "void main()\n"
@@ -128,13 +131,14 @@ void App::run()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    Polygon hexagon = polygonCreate(6.0f, 0.0f, 0.0f, 0.75f);
-
-    float vertices[hexagon.vertices.size()];
-    unsigned int indices[hexagon.indices.size()];
-
-    copy(hexagon.vertices.begin(), hexagon.vertices.end(), vertices);
-    copy(hexagon.indices.begin(), hexagon.indices.end(), indices);
+    Polygon polygons[6] = {
+        polygonCreate(3.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(4.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(5.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(6.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(8.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(100.0f, 0.0f, 0.0f, 0.75f),
+    };
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -144,10 +148,10 @@ void App::run()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, polygons[item_selected_index].vertices.size() * sizeof(float), polygons[item_selected_index].vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, polygons[item_selected_index].indices.size() * sizeof(unsigned int), polygons[item_selected_index].indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -212,20 +216,18 @@ void App::run()
                     // Using the generic BeginCombo() API, you have full control over how to display the combo contents.
                     // (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
                     // stored in the object itself, etc.)
-                    const char* items[] = { "Triangle", "Square", "Pentagon", "Hexagon", "Octagon", "Circle" };
-                    static int item_selected_idx = 0; // Here we store our selection data as an index.
 
                     // Pass in the preview value visible before opening the combo (it could technically be different contents or not pulled from items[])
-                    const char* combo_preview_value = items[item_selected_idx];
+                    const char* combo_preview_value = items[item_selected_index];
                     static ImGuiComboFlags flags = 0;
 
                     if (ImGui::BeginCombo("Shape Selection", combo_preview_value, flags))
                     {
                         for (int n = 0; n < IM_ARRAYSIZE(items); n++)
                         {
-                            const bool is_selected = (item_selected_idx == n);
+                            const bool is_selected = (item_selected_index == n);
                             if (ImGui::Selectable(items[n], is_selected))
-                                item_selected_idx = n;
+                                item_selected_index = n;
 
                             // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                             if (is_selected)
@@ -272,8 +274,15 @@ void App::run()
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         glUniform4f(vertexColorLocation, color.x, color.y, color.z, color.w);
 
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawElements(GL_TRIANGLES, hexagon.indices.size(), GL_UNSIGNED_INT, 0);
+        // Update selected shape
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, polygons[item_selected_index].vertices.size() * sizeof(float), polygons[item_selected_index].vertices.data(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, polygons[item_selected_index].indices.size() * sizeof(unsigned int), polygons[item_selected_index].indices.data(), GL_STATIC_DRAW);
+
+        glBindVertexArray(VAO); // sehexagon we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glDrawElements(GL_TRIANGLES, polygons[item_selected_index].indices.size(), GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
