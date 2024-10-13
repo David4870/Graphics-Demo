@@ -29,6 +29,5 @@ Polygon polygonCreate(float n, float a, float b, float r)
     }
     polygon.indices[polygon.indices.size() - 1] = 1;
 
-    // return std::make_pair(vertices, indices);
     return polygon;
 }
