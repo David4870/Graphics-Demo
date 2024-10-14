@@ -23,11 +23,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 set(BUILD_SHARED_LIBS OFF)
 
 if(BUILD_SHARED_LIBS)
-    set(PROJECT_LIBRARIES SDL3::SDL3-shared GLEW::GLEW-shared OpenGL::GL)
+    set(PROJECT_LIBRARIES SDL3::SDL3-shared GLEW::GLEW-shared OpenGL::GL glm::glm)
     set(SDL_STATIC OFF)
     set(SDL_SHARED ON)
 else()
-    set(PROJECT_LIBRARIES SDL3::SDL3-static GLEW::GLEW-static OpenGL::GL)
+    set(PROJECT_LIBRARIES SDL3::SDL3-static GLEW::GLEW-static OpenGL::GL glm::glm)
     set(SDL_STATIC ON)
     set(SDL_SHARED OFF)
 endif()
@@ -62,7 +62,13 @@ FetchContent_Declare(
     GIT_TAG        v1.91.0
 )
 
-FetchContent_MakeAvailable(SDL3 GLEW IMGUI)
+FetchContent_Declare(
+	GLM
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 	1.0.1
+)
+
+FetchContent_MakeAvailable(SDL3 GLEW IMGUI GLM)
 
 add_subdirectory(${glew_SOURCE_DIR}/build/cmake)
 
