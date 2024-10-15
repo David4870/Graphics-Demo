@@ -6,11 +6,13 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
-#include "demo2DShapes.hpp"
+#include "demoManager.hpp"
+#include "demo2dShapes.hpp"
 #include "appContext.hpp"
 
-void Demo2DShapes::initializeGraphics()
+void Demo2dShapes::initializeGraphics()
 {
+    printf("Initialize  2D!\n");
     // build and compile our shader program
     // ------------------------------------
     // vertex shader
@@ -81,7 +83,7 @@ void Demo2DShapes::initializeGraphics()
     glBindVertexArray(0);
 }
 
-void Demo2DShapes::renderGraphics()
+void Demo2dShapes::renderGraphics()
 {
     glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
@@ -104,24 +106,7 @@ void Demo2DShapes::renderGraphics()
     // glBindVertexArray(0); // no need to unbind it every time
 }
 
-void Demo2DShapes::initializeInterface()
-{
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-
-    ImGui::StyleColorsDark();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplSDL3_InitForOpenGL(context::window, context::glContext);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-}
-
-void Demo2DShapes::renderInterface()
+void Demo2dShapes::renderInterface()
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -171,8 +156,13 @@ void Demo2DShapes::renderInterface()
 
             ImGui::EndTabItem();
         }
+        static bool isTabActive = false;
         if (ImGui::BeginTabItem("3D Shapes"))
         {
+            if (!isTabActive)
+            {
+                DemoManager::setNext(&DemoManager::demo3dShapes);
+            }
             ImGui::Text("This is the 3D Shapes tab!\nblah blah blah blah blah");
             ImGui::SeparatorText("Parameters");
             ImGui::EndTabItem();
@@ -180,11 +170,11 @@ void Demo2DShapes::renderInterface()
         ImGui::EndTabBar();
     }
     ImGui::End();
-    // Rendering
+
     ImGui::Render();
 }
 
-void Demo2DShapes::deallocateOpenGLData()
+void Demo2dShapes::deallocateOpenGLData()
 {
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
@@ -192,9 +182,12 @@ void Demo2DShapes::deallocateOpenGLData()
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
+    
+    printf("Destroy  2D!\n");
+    DemoManager::triggerNext();
 }
 
-void Demo2DShapes::run()
+void Demo2dShapes::run()
 {
     while (context::running)
     {
@@ -205,5 +198,10 @@ void Demo2DShapes::run()
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(context::window);
+        if (DemoManager::isChanged())
+        {
+            context::running = false;
+        }
     }
+    deallocateOpenGLData();
 }

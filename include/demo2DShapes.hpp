@@ -1,12 +1,14 @@
 #pragma once
 
+#include <imgui.h>
+
 #include "app.hpp"
+#include "demo.hpp"
 #include "polygon.hpp"
 
-class Demo2DShapes
+class Demo2dShapes : public Demo
 {
 public:
-    const char *glsl_version = "#version 330";
     const char *items[6] = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
     int item_selected_index = 0;
 
@@ -42,12 +44,12 @@ public:
     unsigned int shaderProgram;
     unsigned int VBO, VAO, EBO;
 
-    Demo2DShapes() {}
-    ~Demo2DShapes() {}
-    void initializeGraphics();
-    void renderGraphics(); 
-    void initializeInterface();
-    void renderInterface();
-    void deallocateOpenGLData();
-    void run(); 
+    Demo2dShapes() {}
+    ~Demo2dShapes() {}
+
+    void initializeGraphics() override;
+    void renderGraphics() override;
+    void renderInterface() override;
+    void deallocateOpenGLData() override;
+    void run() override;
 };

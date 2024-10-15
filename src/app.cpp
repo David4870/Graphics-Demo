@@ -1,15 +1,15 @@
 #include <iostream>
 
+#include <imgui_impl_sdl3.h>
+
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
 
-#include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_opengl3.h>
-
 #include "app.hpp"
 #include "appContext.hpp"
-#include "demo2DShapes.hpp"
+#include "demoManager.hpp"
+#include "demo2dShapes.hpp"
+#include "initTeardown.hpp"
 #include "polygon.hpp"
 
 App::App()
@@ -45,6 +45,7 @@ void App::initialize()
     {
         std::cout << "Error: glewGetErrorString(): " << SDL_GetError() << std::endl; 
     }
+    initializeImGui();
 }
 
 void App::processEvents()
@@ -74,21 +75,13 @@ void App::run()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    Demo2DShapes demoOne;
-
-    demoOne.initializeGraphics();
-    demoOne.initializeInterface();
-
-    demoOne.run();
-
-    demoOne.deallocateOpenGLData();
+    DemoManager::setNext(&DemoManager::demo2dShapes);
+    DemoManager::triggerNext();
 }
 
 void App::quit()
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
+    terminateImGui();
 
     SDL_GL_DestroyContext(context::glContext);
     SDL_DestroyWindow(context::window);
