@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "app.hpp"
 #include "polygon.hpp"
 
@@ -14,6 +16,10 @@ public:
     ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
 
+    glm::vec2 shapePos = glm::vec2(0.0f, 0.0f);
+    glm::vec3 shapeRot= glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::mat4 trans;
+
     Polygon polygons[6] = {
         polygonCreate(3.0f, 0.0f, 0.0f, 0.75f),
         polygonCreate(4.0f, 0.0f, 0.0f, 0.75f),
@@ -25,9 +31,10 @@ public:
 
     const char *vertexShaderSource = "#version 330 core\n"
                                      "layout (location = 0) in vec3 aPos;\n"
+                                     "uniform mat4 transform;\n"
                                      "void main()\n"
                                      "{\n"
-                                     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                     "   gl_Position = transform * vec4(aPos, 1.0);\n"
                                      "}\0";
     const char *fragmentShaderSource = "#version 330 core\n"
                                        "out vec4 FragColor;\n"

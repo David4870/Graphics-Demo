@@ -2,6 +2,10 @@
 
 #include <GL/glew.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
@@ -87,10 +91,21 @@ void Demo2DShapes::renderGraphics()
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // draw our first triangle
+    // draw our shape
     glUseProgram(shaderProgram);
     int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
     glUniform4f(vertexColorLocation, color.x, color.y, color.z, color.w);
+
+    // move and rotate our shape
+    glm::mat4 trans = glm::mat4(1.0f);
+
+    trans = glm::translate(trans, glm::vec3(shapePos.x, shapePos.y, 0.0)); 
+    trans = glm::rotate(trans, glm::radians(shapeRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    trans = glm::rotate(trans, glm::radians(shapeRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    trans = glm::rotate(trans, glm::radians(shapeRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     // Update selected shape
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -130,6 +145,8 @@ void Demo2DShapes::renderInterface()
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
+    ImGui::ShowDemoWindow();
+
     // We specify a default position/size in case there's no data in the .ini file.
     // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
     const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
@@ -154,7 +171,8 @@ void Demo2DShapes::renderInterface()
             const char *combo_preview_value = items[item_selected_index];
             static ImGuiComboFlags flags = 0;
 
-            if (ImGui::BeginCombo("Shape Selection", combo_preview_value, flags))
+            ImGui::SeparatorText("Shape Selection");
+            if (ImGui::BeginCombo(" ", combo_preview_value, flags))
             {
                 for (int n = 0; n < IM_ARRAYSIZE(items); n++)
                 {
@@ -167,6 +185,20 @@ void Demo2DShapes::renderInterface()
                         ImGui::SetItemDefaultFocus();
                 }
                 ImGui::EndCombo();
+            }
+            ImGui::SeparatorText("Position");
+            ImGui::SliderFloat("x position", &shapePos.x, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("y position", &shapePos.y, -1.0f, 1.0f, "%.3f");
+
+            ImGui::SeparatorText("Rotation");
+            ImGui::SliderFloat("x rotation", &shapeRot.x, 0.0f, 360.0f, "%.3f");
+            ImGui::SliderFloat("y rotation", &shapeRot.y, 0.0f, 360.0f, "%.3f");
+            ImGui::SliderFloat("z rotation", &shapeRot.z, 0.0f, 360.0f, "%.3f");
+
+            if(ImGui::Button("Reset"))
+            {
+                shapePos = glm::vec2(0.0f, 0.0f);
+                shapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
             }
 
             ImGui::EndTabItem();
