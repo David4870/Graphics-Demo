@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 
-#include "app.hpp"
 #include "demo.hpp"
 #include "polygon.hpp"
 

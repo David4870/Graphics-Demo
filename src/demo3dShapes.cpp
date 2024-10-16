@@ -6,10 +6,11 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+#include "app.hpp"
+#include "appContext.hpp"
 #include "demo.hpp"
 #include "demoManager.hpp"
 #include "demo3dShapes.hpp"
-#include "appContext.hpp"
 
 Demo3dShapes::Demo3dShapes()
 {

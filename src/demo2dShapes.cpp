@@ -3,13 +3,13 @@
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+#include "app.hpp"
 #include "appContext.hpp"
 #include "demoManager.hpp"
 #include "demo2dShapes.hpp"

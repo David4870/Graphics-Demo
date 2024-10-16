@@ -2,9 +2,7 @@
 
 #include <imgui.h>
 
-#include "app.hpp"
 #include "demo.hpp"
-#include "polygon.hpp"
 
 class Demo3dShapes : public Demo
 {

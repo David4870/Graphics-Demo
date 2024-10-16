@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <SDL3/SDL.h>
+
 #include <GL/glew.h>
 
 #include "app.hpp"

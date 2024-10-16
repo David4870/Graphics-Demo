@@ -20,7 +20,7 @@ void initializeImGui()
 
 void terminateImGui()
 {
-    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
 }
