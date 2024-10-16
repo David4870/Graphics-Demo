@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
 
-
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
@@ -12,78 +11,81 @@
 #include "demoRaycast.hpp"
 #include "appContext.hpp"
 
-void DemoRaycast::checkShaderCompilation(GLuint shader) {
+void DemoRaycast::checkShaderCompilation(uint shader)
+{
     int success;
     char infoLog[512];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cerr << "Shader Compilation Error: " << infoLog << std::endl;
     }
 }
 
-void DemoRaycast::checkProgramLinking(GLuint program) {
+void DemoRaycast::checkProgramLinking(uint program)
+{
     int success;
     char infoLog[512];
     glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         glGetProgramInfoLog(program, 512, NULL, infoLog);
         std::cerr << "Program Linking Error: " << infoLog << std::endl;
     }
 }
 
-void DemoRaycast::createShaderProgram() {
-    // Vertex Shader
+void DemoRaycast::createShaderProgram()
+{
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
     checkShaderCompilation(vertexShader);
 
-    // Fragment Shader
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
     checkShaderCompilation(fragmentShader);
 
-    // Shader Programm
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
     checkProgramLinking(shaderProgram);
 
-    // Shader löschen (da sie bereits ins Programm gelinkt sind)
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
 
-// Bewegung verarbeiten
-void DemoRaycast::processInput(const Uint8* keys, float deltaTime) {
+void DemoRaycast::processInput(const Uint8* keys, float deltaTime)
+{
     float moveStep = moveSpeed * deltaTime;
 
-    if (keys[SDL_SCANCODE_W]) {  // Vorwärts bewegen
+    if (keys[SDL_SCANCODE_W])
+    {
         if (worldMap[int(posX + dirX * moveStep)][int(posY)] == 0) posX += dirX * moveStep;
         if (worldMap[int(posX)][int(posY + dirY * moveStep)] == 0) posY += dirY * moveStep;
     }
-    if (keys[SDL_SCANCODE_S]) {  // Rückwärts bewegen
+    if (keys[SDL_SCANCODE_S])
+    {
         if (worldMap[int(posX - dirX * moveStep)][int(posY)] == 0) posX -= dirX * moveStep;
         if (worldMap[int(posX)][int(posY - dirY * moveStep)] == 0) posY -= dirY * moveStep;
     }
-    if (keys[SDL_SCANCODE_A]) {  // Links bewegen (strafing)
+    if (keys[SDL_SCANCODE_A])
+    {
         if (worldMap[int(posX - planeX * moveStep)][int(posY)] == 0) posX -= planeX * moveStep;
         if (worldMap[int(posX)][int(posY - planeY * moveStep)] == 0) posY -= planeY * moveStep;
     }
-    if (keys[SDL_SCANCODE_D]) {  // Rechts bewegen (strafing)
+    if (keys[SDL_SCANCODE_D])
+    {
         if (worldMap[int(posX + planeX * moveStep)][int(posY)] == 0) posX += planeX * moveStep;
         if (worldMap[int(posX)][int(posY + planeY * moveStep)] == 0) posY += planeY * moveStep;
     }
 }
 
-//input verarbeiten
-void DemoRaycast::processMouseInput(float xOffset, float deltaTime) {
+void DemoRaycast::processMouseInput(float xOffset, float deltaTime)
+{
     float rotStep = rotSpeed * deltaTime * xOffset;
-
-    // Spielerrotation nach links/rechts (um die y-Achse rotieren)
     float oldDirX = dirX;
     dirX = dirX * cos(-rotStep) - dirY * sin(-rotStep);
     dirY = oldDirX * sin(-rotStep) + dirY * cos(-rotStep);
@@ -93,13 +95,14 @@ void DemoRaycast::processMouseInput(float xOffset, float deltaTime) {
 }
 
 
-// Szene rendern
-void DemoRaycast::renderScene(int windowWidth, int windowHeight) {
+void DemoRaycast::renderScene(int windowWidth, int windowHeight)
+{
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shaderProgram);  // Shader aktivieren
+    glUseProgram(shaderProgram);
 
-    for (int x = 0; x < windowWidth; x++) {
+    for (int x = 0; x < windowWidth; x++)
+    {
         float cameraX = 2 * x / (float)windowWidth - 1;
         float rayDirX = dirX + planeX * cameraX;
         float rayDirY = dirY + planeY * cameraX;
@@ -117,27 +120,36 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight) {
         int hit = 0;
         int side;
 
-        if (rayDirX < 0) {
+        if (rayDirX < 0)
+        {
             stepX = -1;
             sideDistX = (posX - mapX) * deltaDistX;
-        } else {
+        }
+        else
+        {
             stepX = 1;
             sideDistX = (mapX + 1.0 - posX) * deltaDistX;
         }
         if (rayDirY < 0) {
             stepY = -1;
             sideDistY = (posY - mapY) * deltaDistY;
-        } else {
+        }
+        else
+        {
             stepY = 1;
             sideDistY = (mapY + 1.0 - posY) * deltaDistY;
         }
 
-        while (hit == 0) {
-            if (sideDistX < sideDistY) {
+        while (hit == 0)
+        {
+            if (sideDistX < sideDistY)
+            {
                 sideDistX += deltaDistX;
                 mapX += stepX;
                 side = 0;
-            } else {
+            }
+            else
+            {
                 sideDistY += deltaDistY;
                 mapY += stepY;
                 side = 1;
@@ -156,11 +168,14 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight) {
         if (drawEnd >= windowHeight) drawEnd = windowHeight - 1;
 
         float wallColor[3];
-        if (side == 1) {
+        if (side == 1)
+        {
             wallColor[0] = 0.7f;
             wallColor[1] = 0.7f;
             wallColor[2] = 0.7f;
-        } else {
+        }
+        else
+        {
             wallColor[0] = 1.0f;
             wallColor[1] = 0.0f;
             wallColor[2] = 0.0f;
@@ -183,8 +198,8 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight) {
     }
 }
 
-// Setup der Buffer
-void DemoRaycast::setupBuffers() {
+void DemoRaycast::setupBuffers()
+{
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
@@ -248,7 +263,11 @@ void DemoRaycast::renderInterface()
         }
         if (ImGui::BeginTabItem("Raycast"))
         {
-            ImGui::Text("This is the Raycast Demo!\nblah blah blah blah blah");
+            ImGui::Text("This is the Raycast Demo!");
+            ImGui::NewLine();
+            ImGui::Text("Press WASD to move around. Use your mouse to look around.");
+            ImGui::Text("Press SPACE to toggle RelativeMouseMode.");
+
             ImGui::SeparatorText("Parameters");
             ImGui::EndTabItem();
         }
@@ -261,8 +280,6 @@ void DemoRaycast::renderInterface()
 
 void DemoRaycast::deallocateOpenGLData()
 {
-    // de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(shaderProgram);
@@ -301,12 +318,10 @@ void DemoRaycast::run()
 
         App::processEvents();
 
-        // Maus-Eingabe verarbeiten
         float mouseX, mouseY;
         SDL_GetRelativeMouseState(&mouseX, &mouseY);
         processMouseInput(mouseX, deltaTime);
 
-        // Tastatur-Eingaben verarbeiten
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
         processInput(keys, deltaTime);
 

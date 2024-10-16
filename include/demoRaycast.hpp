@@ -11,36 +11,32 @@ class DemoRaycast : public Demo
 public:
 
     ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
-
-    // Fenstergröße
     int WINDOW_WIDTH = 1520;
     int WINDOW_HEIGHT = 1080;
 
-    // Raycasting-Daten
-    static const int mapWidth = 8;
-    static const int mapHeight = 8;
+    static const int mapWidth = 10;
+    static const int mapHeight = 10;
 
     int worldMap[mapWidth][mapHeight] = {
-        {1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 1, 1, 0, 0, 1},
-        {1, 0, 0, 1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1}
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+        {1, 0, 0, 1, 1, 0, 1, 0, 0, 1},
+        {1, 0, 0, 1, 1, 0, 1, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 1, 0, 1, 1, 1, 1},
+        {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
     };
 
-    // Spielerposition und Blickrichtung
     float posX = 3.0, posY = 3.0;
     float dirX = -1.0, dirY = 0.0;
-    float planeX = 0.0, planeY = 0.66;  // 2D Kamerafläche
+    float planeX = 0.0, planeY = 0.66;
 
-    // Geschwindigkeit und Drehgeschwindigkeit
     float moveSpeed = 30.0f; 
     float rotSpeed = 2.0f;  
 
-    // Vertex Shader Code
     const char *vertexShaderSource = "#version 330 core\n"
                                      "layout(location = 0) in vec2 aPos;\n"
                                      "void main()\n"
@@ -48,7 +44,6 @@ public:
                                      "  gl_Position = vec4(aPos, 0.0, 1.0);\n"
                                      "}\n";
 
-    // Fragment Shader Code
     const char *fragmentShaderSource = "#version 330 core\n"
                                        "out vec4 FragColor;\n"
                                        "uniform vec3 wallColor;\n"
