@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <imgui.h>
 
 #include "app.hpp"
@@ -60,8 +59,8 @@ public:
     DemoRaycast() {}
     ~DemoRaycast() {}
 
-    void checkShaderCompilation(uint shader);
-    void checkProgramLinking(uint program);
+    void checkShaderCompilation(unsigned int intshader);
+    void checkProgramLinking(unsigned int program);
     void createShaderProgram();
     void processInput(const Uint8* keys, float deltaTime);
     void processMouseInput(float xOffset, float deltaTime);

@@ -11,7 +11,7 @@
 #include "demoRaycast.hpp"
 #include "appContext.hpp"
 
-void DemoRaycast::checkShaderCompilation(uint shader)
+void DemoRaycast::checkShaderCompilation(unsigned int shader)
 {
     int success;
     char infoLog[512];
@@ -23,7 +23,7 @@ void DemoRaycast::checkShaderCompilation(uint shader)
     }
 }
 
-void DemoRaycast::checkProgramLinking(uint program)
+void DemoRaycast::checkProgramLinking(unsigned int program)
 {
     int success;
     char infoLog[512];
@@ -181,7 +181,7 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight)
             wallColor[2] = 0.0f;
         }
 
-        GLint colorLoc = glGetUniformLocation(shaderProgram, "wallColor");
+        int colorLoc = glGetUniformLocation(shaderProgram, "wallColor");
         glUniform3fv(colorLoc, 1, wallColor);
 
         float vertices[] = {
