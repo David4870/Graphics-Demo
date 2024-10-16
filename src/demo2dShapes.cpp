@@ -16,7 +16,6 @@
 
 void Demo2dShapes::initializeGraphics()
 {
-    printf("Initialize  2D!\n");
     // build and compile our shader program
     // ------------------------------------
     // vertex shader
@@ -215,7 +214,6 @@ void Demo2dShapes::deallocateOpenGLData()
     glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
     
-    printf("Destroy  2D!\n");
     DemoManager::triggerNext();
 }
 

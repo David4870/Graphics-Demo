@@ -13,7 +13,7 @@
 
 void Demo3dShapes::initializeGraphics()
 {
-    printf("Initialize  3D!\n");
+
 }
 
 void Demo3dShapes::renderGraphics()
@@ -65,7 +65,6 @@ void Demo3dShapes::renderInterface()
 
 void Demo3dShapes::deallocateOpenGLData()
 {
-    printf("Destroy  3D!\n");
     DemoManager::triggerNext();
 }
 
