@@ -31,3 +31,4 @@ bool DemoManager::isDemoChanged;
 Demo *DemoManager::currentDemo = nullptr;
 Demo2dShapes DemoManager::demo2dShapes;
 Demo3dShapes DemoManager::demo3dShapes;
+DemoRaycast DemoManager::demoRaycast;

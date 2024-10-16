@@ -56,6 +56,14 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Raycast"))
+        {
+            if (!isTabActive)
+            {
+                DemoManager::setNext(&DemoManager::demoRaycast);
+            }
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
     ImGui::End();

@@ -194,8 +194,14 @@ void Demo2dShapes::renderInterface()
             {
                 DemoManager::setNext(&DemoManager::demo3dShapes);
             }
-            ImGui::Text("This is the 3D Shapes tab!\nblah blah blah blah blah");
-            ImGui::SeparatorText("Parameters");
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Raycast"))
+        {
+            if (!isTabActive)
+            {
+                DemoManager::setNext(&DemoManager::demoRaycast);
+            }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
