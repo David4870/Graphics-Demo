@@ -129,8 +129,6 @@ void Demo2dShapes::renderInterface()
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
-    ImGui::ShowDemoWindow();
-
     // We specify a default position/size in case there's no data in the .ini file.
     // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
     const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
