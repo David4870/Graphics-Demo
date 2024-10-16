@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <glm/glm.hpp>
 #include <imgui.h>
 
@@ -10,52 +12,34 @@
 class Demo2dShapes : public Demo
 {
 public:
-    const char *items[6] = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
-    int item_selected_index = 0;
 
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
-    ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
-
-    glm::vec2 shapePos = glm::vec2(0.0f, 0.0f);
-    glm::vec3 shapeRot= glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::mat4 trans;
-
-    Polygon polygons[6] = {
-        polygonCreate(3.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(4.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(5.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(6.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(8.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(100.0f, 0.0f, 0.0f, 0.75f),
-    };
-
-    const char *vertexShaderSource = "#version 330 core\n"
-                                     "layout (location = 0) in vec3 aPos;\n"
-                                     "uniform mat4 transform;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "   gl_Position = transform * vec4(aPos, 1.0);\n"
-                                     "}\0";
-    const char *fragmentShaderSource = "#version 330 core\n"
-                                       "out vec4 FragColor;\n"
-                                       "uniform vec4 ourColor;\n"
-                                       "void main()\n"
-                                       "{\n"
-                                       "   FragColor = ourColor;\n"
-                                       "}\n\0";
-
-    unsigned int vertexShader;
-    unsigned int fragmentShader;
-    unsigned int shaderProgram;
-    unsigned int VBO, VAO, EBO;
-
-    Demo2dShapes() {}
-    ~Demo2dShapes() {}
+    Demo2dShapes();
+    ~Demo2dShapes();
 
     void initializeGraphics() override;
     void renderGraphics() override;
     void renderInterface() override;
     void deallocateOpenGLData() override;
     void run() override;
+
+private:
+    std::vector<Polygon> m_Polygons;
+    std::vector<const char*> m_Shapes;
+    int m_SelectedShape;
+
+    ImVec4 m_ClearColor;
+    ImVec4 m_Color;
+
+    glm::vec2 m_ShapePos;
+    glm::vec3 m_ShapeRot;
+    glm::mat4 m_Trans;
+
+
+    const char *m_VertexShaderSource;
+    const char *m_FragmentShaderSource;
+    unsigned int m_VertexShader;
+    unsigned int m_FragmentShader;
+    unsigned int m_ShaderProgram;
+
+    unsigned int m_VBO, m_VAO, m_EBO;
 };

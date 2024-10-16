@@ -10,78 +10,118 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+#include "appContext.hpp"
 #include "demoManager.hpp"
 #include "demo2dShapes.hpp"
-#include "appContext.hpp"
+#include "polygon.hpp"
+
+Demo2dShapes::Demo2dShapes()
+{
+    m_Shapes = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
+    m_SelectedShape = 0;
+
+    m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
+    m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
+
+    m_ShapePos = glm::vec2(0.0f, 0.0f);
+    m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    m_Polygons = {
+        polygonCreate(3.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(4.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(5.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(6.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(8.0f, 0.0f, 0.0f, 0.75f),
+        polygonCreate(100.0f, 0.0f, 0.0f, 0.75f),
+    };
+
+    m_VertexShaderSource = "#version 330 core\n"
+                                     "layout (location = 0) in vec3 aPos;\n"
+                                     "uniform mat4 transform;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "   gl_Position = transform * vec4(aPos, 1.0);\n"
+                                     "}\0";
+
+    m_FragmentShaderSource = "#version 330 core\n"
+                                       "out vec4 FragColor;\n"
+                                       "uniform vec4 ourColor;\n"
+                                       "void main()\n"
+                                       "{\n"
+                                       "   FragColor = ourColor;\n"
+                                       "}\n\0";
+}
+
+Demo2dShapes::~Demo2dShapes() {}
 
 void Demo2dShapes::initializeGraphics()
 {
     // build and compile our shader program
     // ------------------------------------
     // vertex shader
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
+    m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(m_VertexShader, 1, &m_VertexShaderSource, NULL);
+    glCompileShader(m_VertexShader);
     // check for shader compile errors
     int success;
     char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(m_VertexShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(m_VertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
                   << infoLog << std::endl;
     }
     // fragment shader
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
+    m_FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(m_FragmentShader, 1, &m_FragmentShaderSource, NULL);
+    glCompileShader(m_FragmentShader);
     // check for shader compile errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(m_FragmentShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(m_FragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
                   << infoLog << std::endl;
     }
     // link shaders
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    m_ShaderProgram = glCreateProgram();
+    glAttachShader(m_ShaderProgram, m_VertexShader);
+    glAttachShader(m_ShaderProgram, m_FragmentShader);
+    glLinkProgram(m_ShaderProgram);
     // check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &success);
     if (!success)
     {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        glGetProgramInfoLog(m_ShaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
                   << infoLog << std::endl;
     }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(m_VertexShader);
+    glDeleteShader(m_FragmentShader);
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_EBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
+    glBindVertexArray(m_VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, polygons[item_selected_index].vertices.size() * sizeof(float), polygons[item_selected_index].vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, m_Polygons[m_SelectedShape].vertices.size() * sizeof(float), m_Polygons[m_SelectedShape].vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, polygons[item_selected_index].indices.size() * sizeof(unsigned int), polygons[item_selected_index].indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(unsigned int), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+    // note that this is allowed, the call to glVertexAttribPointer registered m_VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+    // remember: do NOT unbind the m_EBO while a m_VAO is active as the bound element buffer object IS stored in the m_VAO; keep the m_EBO bound.
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+    // You can unbind the m_VAO afterwards so other m_VAO calls won't accidentally modify this m_VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0);
 }
@@ -89,34 +129,34 @@ void Demo2dShapes::initializeGraphics()
 void Demo2dShapes::renderGraphics()
 {
     glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // draw our shape
-    glUseProgram(shaderProgram);
-    int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-    glUniform4f(vertexColorLocation, color.x, color.y, color.z, color.w);
+    glUseProgram(m_ShaderProgram);
+    int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
+    glUniform4f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z, m_Color.w);
 
     // move and rotate our shape
-    glm::mat4 trans = glm::mat4(1.0f);
+    glm::mat4 m_Trans = glm::mat4(1.0f);
 
-    trans = glm::translate(trans, glm::vec3(shapePos.x, shapePos.y, 0.0)); 
-    trans = glm::rotate(trans, glm::radians(shapeRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    trans = glm::rotate(trans, glm::radians(shapeRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    trans = glm::rotate(trans, glm::radians(shapeRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    m_Trans = glm::translate(m_Trans, glm::vec3(m_ShapePos.x, m_ShapePos.y, 0.0)); 
+    m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+    unsigned int transformLoc = glGetUniformLocation(m_ShaderProgram, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(m_Trans));
 
     // Update selected shape
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, polygons[item_selected_index].vertices.size() * sizeof(float), polygons[item_selected_index].vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, m_Polygons[m_SelectedShape].vertices.size() * sizeof(float), m_Polygons[m_SelectedShape].vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, polygons[item_selected_index].indices.size() * sizeof(unsigned int), polygons[item_selected_index].indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(unsigned int), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
-    glBindVertexArray(VAO); // sehexagon we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-    glDrawElements(GL_TRIANGLES, polygons[item_selected_index].indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(m_VAO); // sehexagon we only have a single m_VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+    glDrawElements(GL_TRIANGLES, m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
     // glBindVertexArray(0); // no need to unbind it every time
 }
 
@@ -131,58 +171,57 @@ void Demo2dShapes::renderInterface()
 
     // We specify a default position/size in case there's no data in the .ini file.
     // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
-    const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y));
+    const ImGuiViewport *mainViewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(400, 1080));
     ImGui::Begin("DemosAndParameters", nullptr, flags); // Create the demo selection and parameter window.
-    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-    if (ImGui::BeginTabBar("Demos", tab_bar_flags))
+    ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
+    if (ImGui::BeginTabBar("Demos", tabBarFlags))
     {
         if (ImGui::BeginTabItem("2D Shapes"))
         {
             ImGui::Text("This is the 2D Shapes tab!\nblah blah blah blah blah");
             ImGui::SeparatorText("Parameters");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
-            ImGui::ColorPicker4("Shape Color", (float *)&color, flags);
+            ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
 
             // Using the generic BeginCombo() API, you have full control over how to display the combo contents.
             // (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
             // stored in the object itself, etc.)
 
-            // Pass in the preview value visible before opening the combo (it could technically be different contents or not pulled from items[])
-            const char *combo_preview_value = items[item_selected_index];
+            // Pass in the preview value visible before opening the combo (it could technically be different contents or not pulled from m_Shapes[])
+            const char *comboPreviewValue = m_Shapes[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
 
             ImGui::SeparatorText("Shape Selection");
-            if (ImGui::BeginCombo(" ", combo_preview_value, flags))
+            if (ImGui::BeginCombo(" ", comboPreviewValue, flags))
             {
-                for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+                for (int n = 0; n < m_Shapes.size(); n++)
                 {
-                    const bool is_selected = (item_selected_index == n);
-                    if (ImGui::Selectable(items[n], is_selected))
-                        item_selected_index = n;
+                    const bool isSelected = (m_SelectedShape == n);
+                    if (ImGui::Selectable(m_Shapes[n], isSelected))
+                        m_SelectedShape = n;
 
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                    if (is_selected)
+                    if (isSelected)
                         ImGui::SetItemDefaultFocus();
                 }
                 ImGui::EndCombo();
             }
             ImGui::SeparatorText("Position");
-            ImGui::SliderFloat("x position", &shapePos.x, -1.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("y position", &shapePos.y, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("y position", &m_ShapePos.y, -1.0f, 1.0f, "%.3f");
 
             ImGui::SeparatorText("Rotation");
-            ImGui::SliderFloat("x rotation", &shapeRot.x, 0.0f, 360.0f, "%.3f");
-            ImGui::SliderFloat("y rotation", &shapeRot.y, 0.0f, 360.0f, "%.3f");
-            ImGui::SliderFloat("z rotation", &shapeRot.z, 0.0f, 360.0f, "%.3f");
+            ImGui::SliderFloat("x rotation", &m_ShapeRot.x, 0.0f, 360.0f, "%.3f");
+            ImGui::SliderFloat("y rotation", &m_ShapeRot.y, 0.0f, 360.0f, "%.3f");
+            ImGui::SliderFloat("z rotation", &m_ShapeRot.z, 0.0f, 360.0f, "%.3f");
 
-            if(ImGui::Button("Reset"))
+            if (ImGui::Button("Reset"))
             {
-                shapePos = glm::vec2(0.0f, 0.0f);
-                shapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+                m_ShapePos = glm::vec2(0.0f, 0.0f);
+                m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
             }
-
             ImGui::EndTabItem();
         }
         static bool isTabActive = false;
@@ -190,7 +229,7 @@ void Demo2dShapes::renderInterface()
         {
             if (!isTabActive)
             {
-                DemoManager::setNext(&DemoManager::demo3dShapes);
+                DemoManager::setNext(&DemoManager::m_Demo3dShapes);
             }
             ImGui::Text("This is the 3D Shapes tab!\nblah blah blah blah blah");
             ImGui::SeparatorText("Parameters");
@@ -207,10 +246,10 @@ void Demo2dShapes::deallocateOpenGLData()
 {
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+    glDeleteVertexArrays(1, &m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_EBO);
+    glDeleteProgram(m_ShaderProgram);
     
     DemoManager::triggerNext();
 }

@@ -9,14 +9,15 @@
 class Demo3dShapes : public Demo
 {
 public:
-    ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
-
-    Demo3dShapes() {}
-    ~Demo3dShapes() {}
+    Demo3dShapes();
+    ~Demo3dShapes();
 
     void initializeGraphics() override;
     void renderGraphics() override;
     void renderInterface() override;
     void deallocateOpenGLData() override;
     void run() override;
+
+private:
+    ImVec4 m_ClearColor;
 };

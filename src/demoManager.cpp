@@ -2,32 +2,32 @@
 
 void DemoManager::setNext(Demo *newDemo)
 {
-    currentDemo = newDemo;
-    if (currentDemo != nullptr)
+    m_CurrentDemo = newDemo;
+    if (m_CurrentDemo != nullptr)
     {
-        isDemoChanged = true;
+        m_IsDemoChanged = true;
     }
 }
 
 bool DemoManager::isChanged()
 {
-    return isDemoChanged;
+    return m_IsDemoChanged;
 }
 
 void DemoManager::triggerNext()
 {
-    if (isDemoChanged)
+    if (m_IsDemoChanged)
     {
-        isDemoChanged = false;
+        m_IsDemoChanged = false;
         context::running = true;
 
-        currentDemo->initializeGraphics();
+        m_CurrentDemo->initializeGraphics();
 
-        currentDemo->run();
+        m_CurrentDemo->run();
     }
 }
 
-bool DemoManager::isDemoChanged;
-Demo *DemoManager::currentDemo = nullptr;
-Demo2dShapes DemoManager::demo2dShapes;
-Demo3dShapes DemoManager::demo3dShapes;
+bool DemoManager::m_IsDemoChanged;
+Demo *DemoManager::m_CurrentDemo = nullptr;
+Demo2dShapes DemoManager::m_Demo2dShapes;
+Demo3dShapes DemoManager::m_Demo3dShapes;

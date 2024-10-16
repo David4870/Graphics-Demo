@@ -12,5 +12,5 @@ public:
 
 private:
     void initialize();
-    void quit();
+    void terminate();
 };

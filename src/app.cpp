@@ -19,7 +19,7 @@ App::App()
 
 App::~App()
 {
-    quit();
+    terminate();
 }
 
 void App::initialize()
@@ -75,11 +75,11 @@ void App::run()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    DemoManager::setNext(&DemoManager::demo2dShapes);
+    DemoManager::setNext(&DemoManager::m_Demo2dShapes);
     DemoManager::triggerNext();
 }
 
-void App::quit()
+void App::terminate()
 {
     terminateImGui();
 
