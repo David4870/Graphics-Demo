@@ -2,8 +2,6 @@
 
 #include <GL/glew.h>
 
-#include <imgui.h>
-#include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
 #include "app.hpp"
@@ -32,9 +30,7 @@ void Demo3dShapes::renderGraphics()
 
 void Demo3dShapes::renderInterface()
 {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
+    App::startImGuiFrame();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
@@ -62,9 +58,8 @@ void Demo3dShapes::renderInterface()
         }
         ImGui::EndTabBar();
     }
-    ImGui::End();
 
-    ImGui::Render();
+    App::endImGuiFrame();
 }
 
 void Demo3dShapes::deallocateGraphicsData() {}

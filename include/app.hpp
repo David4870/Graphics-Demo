@@ -6,6 +6,8 @@ public:
     App();
     ~App();
     static void processEvents();
+    static void startImGuiFrame();
+    static void endImGuiFrame();
     void run();
 
 private:

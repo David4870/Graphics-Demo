@@ -2,7 +2,9 @@
 
 #include <SDL3/SDL.h>
 
+#include <imgui.h>
 #include <imgui_impl_sdl3.h>
+#include <imgui_impl_opengl3.h>
 
 #include "app.hpp"
 #include "appContext.hpp"
@@ -38,6 +40,19 @@ void App::initialize()
 
     initializeGLEW();
     initializeImGui();
+}
+
+void App::startImGuiFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+}
+
+void App::endImGuiFrame()
+{
+    ImGui::End();
+    ImGui::Render();
 }
 
 void App::processAppEvents()
