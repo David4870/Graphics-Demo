@@ -2,15 +2,13 @@
 
 #include <SDL3/SDL.h>
 
-#include <GL/glew.h>
-
 #include <imgui_impl_sdl3.h>
 
 #include "app.hpp"
 #include "appContext.hpp"
 #include "demoManager.hpp"
 #include "demo2dShapes.hpp"
-#include "initTeardown.hpp"
+#include "initTerminate.hpp"
 #include "polygon.hpp"
 
 App::App()
@@ -25,10 +23,7 @@ App::~App()
 
 void App::initialize()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        std::cout << "Error: SDL_Init(): " << SDL_GetError() << std::endl; 
-    }
+    initializeSDL();
 
     context::window = SDL_CreateWindow("Graphics-Demo", context::WINDOW_WIDTH, context::WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
     if (context::window == nullptr) {
@@ -41,11 +36,7 @@ void App::initialize()
         std::cout << "Error: SDL_GL_CreateContext():" << SDL_GetError() << std::endl; 
     }
 
-    GLenum err = glewInit();
-    if (err != GLEW_OK)
-    {
-        std::cout << "Error: glewGetErrorString(): " << SDL_GetError() << std::endl; 
-    }
+    initializeGLEW();
     initializeImGui();
 }
 
@@ -84,8 +75,5 @@ void App::run()
 void App::terminate()
 {
     terminateImGui();
-
-    SDL_GL_DestroyContext(context::glContext);
-    SDL_DestroyWindow(context::window);
-    SDL_Quit();
+    terminateSDL();
 }
