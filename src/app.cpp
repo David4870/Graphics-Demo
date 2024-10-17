@@ -40,6 +40,16 @@ void App::initialize()
     initializeImGui();
 }
 
+void App::processAppEvents()
+{
+    using namespace context;
+
+    if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE))
+    {
+        running = false;
+    }
+}
+
 void App::processEvents()
 {
     using namespace context;
@@ -47,8 +57,7 @@ void App::processEvents()
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL3_ProcessEvent(&event);
-        if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE))
-            running = false;
+        processAppEvents();
         DemoManager::processDemoEvents();
     }
 }

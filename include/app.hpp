@@ -9,6 +9,7 @@ public:
     void run();
 
 private:
+    static void processAppEvents();
     void initialize();
     void terminate();
 };
