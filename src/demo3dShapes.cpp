@@ -19,9 +19,9 @@ Demo3dShapes::Demo3dShapes()
 
 Demo3dShapes::~Demo3dShapes() {}
 
-void Demo3dShapes::initializeGraphics() {}
-
 void Demo3dShapes::processEvents() {}
+
+void Demo3dShapes::initializeGraphics() {}
 
 void Demo3dShapes::renderGraphics()
 {
@@ -32,19 +32,16 @@ void Demo3dShapes::renderGraphics()
 
 void Demo3dShapes::renderInterface()
 {
-    // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
-    // We specify a default position/size in case there's no data in the .ini file.
-    // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
     const ImGuiViewport *mainViewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(400, 1080));
-    ImGui::Begin("DemosAndParameters", nullptr, flags); // Create the demo selection and parameter window.
+    ImGui::Begin("DemosAndParameters", nullptr, flags);
     ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("Demos", tabBarFlags))
     {
@@ -80,6 +77,7 @@ void Demo3dShapes::startNextDemo()
 void Demo3dShapes::run()
 {
     initializeGraphics();
+
     while (!DemoManager::demoShouldEnd())
     {
         App::processEvents();
@@ -90,6 +88,7 @@ void Demo3dShapes::run()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(context::window);
     }
+
     deallocateGraphicsData();
     startNextDemo();
 }

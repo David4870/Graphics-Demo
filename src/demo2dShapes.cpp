@@ -58,8 +58,6 @@ void Demo2dShapes::processEvents() {}
 
 void Demo2dShapes::initializeGraphics()
 {
-    // build and compile our shader program
-    // ------------------------------------
     // vertex shader
     m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(m_VertexShader, 1, &m_VertexShaderSource, NULL);
@@ -105,7 +103,7 @@ void Demo2dShapes::initializeGraphics()
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+
     glBindVertexArray(m_VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
@@ -117,14 +115,7 @@ void Demo2dShapes::initializeGraphics()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered m_VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // remember: do NOT unbind the m_EBO while a m_VAO is active as the bound element buffer object IS stored in the m_VAO; keep the m_EBO bound.
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // You can unbind the m_VAO afterwards so other m_VAO calls won't accidentally modify this m_VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0);
 }
 
@@ -159,24 +150,20 @@ void Demo2dShapes::renderGraphics()
 
     glBindVertexArray(m_VAO); // sehexagon we only have a single m_VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
     glDrawElements(GL_TRIANGLES, m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
-    // glBindVertexArray(0); // no need to unbind it every time
 }
 
 void Demo2dShapes::renderInterface()
 {
-    // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
-    // We specify a default position/size in case there's no data in the .ini file.
-    // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
     const ImGuiViewport *mainViewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(400, 1080));
-    ImGui::Begin("DemosAndParameters", nullptr, flags); // Create the demo selection and parameter window.
+    ImGui::Begin("DemosAndParameters", nullptr, flags);
     ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("Demos", tabBarFlags))
     {
@@ -187,11 +174,6 @@ void Demo2dShapes::renderInterface()
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
 
-            // Using the generic BeginCombo() API, you have full control over how to display the combo contents.
-            // (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
-            // stored in the object itself, etc.)
-
-            // Pass in the preview value visible before opening the combo (it could technically be different contents or not pulled from m_Shapes[])
             const char *comboPreviewValue = m_Shapes[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
 
@@ -204,7 +186,6 @@ void Demo2dShapes::renderInterface()
                     if (ImGui::Selectable(m_Shapes[n], isSelected))
                         m_SelectedShape = n;
 
-                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                     if (isSelected)
                         ImGui::SetItemDefaultFocus();
                 }
@@ -246,8 +227,6 @@ void Demo2dShapes::renderInterface()
 
 void Demo2dShapes::deallocateGraphicsData()
 {
-    // de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
@@ -262,6 +241,7 @@ void Demo2dShapes::startNextDemo()
 void Demo2dShapes::run()
 {
     initializeGraphics();
+
     while (!DemoManager::demoShouldEnd())
     {
         App::processEvents();
@@ -272,6 +252,7 @@ void Demo2dShapes::run()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(context::window);
     }
+
     deallocateGraphicsData();
     startNextDemo();
 }
