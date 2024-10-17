@@ -1,17 +1,15 @@
 #include "demoManager.hpp"
 
+void DemoManager::processDemoEvents()
+{
+    m_CurrentDemo->processEvents();
+}
+
 void DemoManager::setNext(Demo *newDemo)
 {
     m_CurrentDemo = newDemo;
-    if (m_CurrentDemo != nullptr)
-    {
-        m_IsDemoChanged = true;
-    }
-}
-
-bool DemoManager::isChanged()
-{
-    return m_IsDemoChanged;
+    assert(m_CurrentDemo != nullptr && "Next demo was not successfully set!");
+    m_IsDemoChanged = true;
 }
 
 void DemoManager::triggerNext()
@@ -21,10 +19,18 @@ void DemoManager::triggerNext()
         m_IsDemoChanged = false;
         context::running = true;
 
-        m_CurrentDemo->initializeGraphics();
-
         m_CurrentDemo->run();
     }
+}
+
+bool DemoManager::demoShouldEnd()
+{
+    if (m_IsDemoChanged)
+    {
+        context::running = false;
+    }
+
+    return !context::running;
 }
 
 bool DemoManager::m_IsDemoChanged;

@@ -12,11 +12,13 @@ public:
     static Demo3dShapes m_Demo3dShapes;
 
 public:
+    static void processDemoEvents();
     static void setNext(Demo *newDemo);
-    static bool isChanged();
     static void triggerNext();
+    static bool demoShouldEnd();
 
 private:
     static bool m_IsDemoChanged;
+    static bool m_DemoShouldClose;
     static Demo *m_CurrentDemo;
 };

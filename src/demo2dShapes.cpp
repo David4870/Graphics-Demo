@@ -54,6 +54,8 @@ Demo2dShapes::Demo2dShapes()
 
 Demo2dShapes::~Demo2dShapes() {}
 
+void Demo2dShapes::processEvents() {}
+
 void Demo2dShapes::initializeGraphics()
 {
     // build and compile our shader program
@@ -242,7 +244,7 @@ void Demo2dShapes::renderInterface()
     ImGui::Render();
 }
 
-void Demo2dShapes::deallocateOpenGLData()
+void Demo2dShapes::deallocateGraphicsData()
 {
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
@@ -250,13 +252,17 @@ void Demo2dShapes::deallocateOpenGLData()
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
     glDeleteProgram(m_ShaderProgram);
-    
+}
+
+void Demo2dShapes::startNextDemo()
+{
     DemoManager::triggerNext();
 }
 
 void Demo2dShapes::run()
 {
-    while (context::running)
+    initializeGraphics();
+    while (!DemoManager::demoShouldEnd())
     {
         App::processEvents();
 
@@ -265,10 +271,7 @@ void Demo2dShapes::run()
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(context::window);
-        if (DemoManager::isChanged())
-        {
-            context::running = false;
-        }
     }
-    deallocateOpenGLData();
+    deallocateGraphicsData();
+    startNextDemo();
 }

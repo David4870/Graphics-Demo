@@ -21,6 +21,8 @@ Demo3dShapes::~Demo3dShapes() {}
 
 void Demo3dShapes::initializeGraphics() {}
 
+void Demo3dShapes::processEvents() {}
+
 void Demo3dShapes::renderGraphics()
 {
     glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
@@ -68,14 +70,17 @@ void Demo3dShapes::renderInterface()
     ImGui::Render();
 }
 
-void Demo3dShapes::deallocateOpenGLData()
+void Demo3dShapes::deallocateGraphicsData() {}
+
+void Demo3dShapes::startNextDemo()
 {
     DemoManager::triggerNext();
 }
 
 void Demo3dShapes::run()
 {
-    while (context::running)
+    initializeGraphics();
+    while (!DemoManager::demoShouldEnd())
     {
         App::processEvents();
 
@@ -84,10 +89,7 @@ void Demo3dShapes::run()
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(context::window);
-        if (DemoManager::isChanged())
-        {
-            context::running = false;
-        }
     }
-    deallocateOpenGLData();
+    deallocateGraphicsData();
+    startNextDemo();
 }

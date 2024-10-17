@@ -11,15 +11,17 @@
 class Demo2dShapes : public Demo
 {
 public:
-
     Demo2dShapes();
     ~Demo2dShapes();
+    void processEvents() override;
+    void run() override;
 
+protected:
     void initializeGraphics() override;
     void renderGraphics() override;
     void renderInterface() override;
-    void deallocateOpenGLData() override;
-    void run() override;
+    void deallocateGraphicsData() override;
+    void startNextDemo() override;
 
 private:
     std::vector<Polygon> m_Polygons;
@@ -32,7 +34,6 @@ private:
     glm::vec2 m_ShapePos;
     glm::vec3 m_ShapeRot;
     glm::mat4 m_Trans;
-
 
     const char *m_VertexShaderSource;
     const char *m_FragmentShaderSource;
