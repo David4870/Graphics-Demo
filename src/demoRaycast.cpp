@@ -63,23 +63,23 @@ void DemoRaycast::processInput(const Uint8* keys, float deltaTime)
 
     if (keys[SDL_SCANCODE_W])
     {
-        if (worldMap[int(posX + dirX * moveStep)][int(posY)] == 0) posX += dirX * moveStep;
-        if (worldMap[int(posX)][int(posY + dirY * moveStep)] == 0) posY += dirY * moveStep;
+        if (maps[map_selected_index][int(posX + dirX * moveStep)][int(posY)] == 0) posX += dirX * moveStep;
+        if (maps[map_selected_index][int(posX)][int(posY + dirY * moveStep)] == 0) posY += dirY * moveStep;
     }
     if (keys[SDL_SCANCODE_S])
     {
-        if (worldMap[int(posX - dirX * moveStep)][int(posY)] == 0) posX -= dirX * moveStep;
-        if (worldMap[int(posX)][int(posY - dirY * moveStep)] == 0) posY -= dirY * moveStep;
+        if (maps[map_selected_index][int(posX - dirX * moveStep)][int(posY)] == 0) posX -= dirX * moveStep;
+        if (maps[map_selected_index][int(posX)][int(posY - dirY * moveStep)] == 0) posY -= dirY * moveStep;
     }
     if (keys[SDL_SCANCODE_A])
     {
-        if (worldMap[int(posX - planeX * moveStep)][int(posY)] == 0) posX -= planeX * moveStep;
-        if (worldMap[int(posX)][int(posY - planeY * moveStep)] == 0) posY -= planeY * moveStep;
+        if (maps[map_selected_index][int(posX - planeX * moveStep)][int(posY)] == 0) posX -= planeX * moveStep;
+        if (maps[map_selected_index][int(posX)][int(posY - planeY * moveStep)] == 0) posY -= planeY * moveStep;
     }
     if (keys[SDL_SCANCODE_D])
     {
-        if (worldMap[int(posX + planeX * moveStep)][int(posY)] == 0) posX += planeX * moveStep;
-        if (worldMap[int(posX)][int(posY + planeY * moveStep)] == 0) posY += planeY * moveStep;
+        if (maps[map_selected_index][int(posX + planeX * moveStep)][int(posY)] == 0) posX += planeX * moveStep;
+        if (maps[map_selected_index][int(posX)][int(posY + planeY * moveStep)] == 0) posY += planeY * moveStep;
     }
 }
 
@@ -100,7 +100,7 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight)
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shaderProgram);
-
+    static int counter = 0;
     for (int x = 0; x < windowWidth; x++)
     {
         float cameraX = 2 * x / (float)windowWidth - 1;
@@ -154,7 +154,7 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight)
                 mapY += stepY;
                 side = 1;
             }
-            if (worldMap[mapX][mapY] > 0) hit = 1;
+            if (maps[map_selected_index][mapX][mapY] > 0) hit = 1;
         }
 
         if (side == 0) perpWallDist = (mapX - posX + (1 - stepX) / 2) / rayDirX;
@@ -167,22 +167,16 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight)
         int drawEnd = lineHeight / 2 + windowHeight / 2;
         if (drawEnd >= windowHeight) drawEnd = windowHeight - 1;
 
-        float wallColor[3];
+        int colorLoc = glGetUniformLocation(shaderProgram, "wallColor");
+
         if (side == 1)
         {
-            wallColor[0] = 0.7f;
-            wallColor[1] = 0.7f;
-            wallColor[2] = 0.7f;
+            glUniform4f(colorLoc, southNorthColor.x, southNorthColor.y, southNorthColor.z, southNorthColor.w);
         }
         else
         {
-            wallColor[0] = 1.0f;
-            wallColor[1] = 0.0f;
-            wallColor[2] = 0.0f;
+            glUniform4f(colorLoc, eastWestColor.x, eastWestColor.y, eastWestColor.z, eastWestColor.w);
         }
-
-        int colorLoc = glGetUniformLocation(shaderProgram, "wallColor");
-        glUniform3fv(colorLoc, 1, wallColor);
 
         float vertices[] = {
             2.0f * x / windowWidth - 1.0f, 2.0f * drawStart / windowHeight - 1.0f,
@@ -212,7 +206,6 @@ void DemoRaycast::setupBuffers()
 
 void DemoRaycast::initializeGraphics()
 {
-    printf("Initialize  Raycast!\n");
     createShaderProgram();
     setupBuffers();
 }
@@ -269,6 +262,31 @@ void DemoRaycast::renderInterface()
             ImGui::Text("Press SPACE to toggle RelativeMouseMode.");
 
             ImGui::SeparatorText("Parameters");
+            if (ImGui::CollapsingHeader("Wall Colors", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
+                ImGui::ColorPicker4("South/North color", (float *)&southNorthColor, flags);
+                ImGui::ColorPicker4("East/West color", (float *)&eastWestColor, flags);
+            }
+
+            const char *combo_preview_value = items[map_selected_index];
+            static ImGuiComboFlags flags = 0;
+            ImGui::SeparatorText("Map Selection");
+            if (ImGui::BeginCombo(" ", combo_preview_value, flags))
+            {
+                for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+                {
+                    const bool is_selected = (map_selected_index == n);
+                    if (ImGui::Selectable(items[n], is_selected))
+                        map_selected_index = n;
+
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -284,7 +302,6 @@ void DemoRaycast::deallocateOpenGLData()
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(shaderProgram);
     
-    printf("Destroy Raycast!\n");
     DemoManager::triggerNext();
 }
 
@@ -320,7 +337,10 @@ void DemoRaycast::run()
 
         float mouseX, mouseY;
         SDL_GetRelativeMouseState(&mouseX, &mouseY);
-        processMouseInput(mouseX, deltaTime);
+        if (SDL_GetRelativeMouseMode() == true)
+        {
+            processMouseInput(mouseX, deltaTime);
+        }
 
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
         processInput(keys, deltaTime);

@@ -10,23 +10,54 @@ class DemoRaycast : public Demo
 public:
 
     ImVec4 clear_color = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
+    ImVec4 southNorthColor = ImVec4(200.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f);
+    ImVec4 eastWestColor = ImVec4(178.0f / 255.0f, 178.0f / 255.0f, 178.0f / 255.0f, 255.0f / 255.0f);
     int WINDOW_WIDTH = 1520;
     int WINDOW_HEIGHT = 1080;
 
     static const int mapWidth = 10;
     static const int mapHeight = 10;
 
-    int worldMap[mapWidth][mapHeight] = {
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
-        {1, 0, 0, 1, 1, 0, 1, 0, 0, 1},
-        {1, 0, 0, 1, 1, 0, 1, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1, 0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    const char *items[3] = {"Cube", "Maze", "Rooms"};
+    int map_selected_index = 0;
+
+    int maps[3][mapWidth][mapHeight] = {
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+            {1, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        },
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 1, 0, 1, 1, 1, 0, 1},
+            {1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+            {1, 0, 0, 1, 1, 1, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 0, 0, 1, 0, 1},
+            {1, 0, 0, 0, 0, 1, 1, 1, 1, 1},
+            {1, 0, 1, 1, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        },
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+            {1, 0, 0, 1, 1, 0, 1, 0, 0, 1},
+            {1, 0, 0, 1, 1, 0, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 1, 0, 1, 1, 1, 1},
+            {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        },
     };
 
     float posX = 3.0, posY = 3.0;
@@ -45,10 +76,10 @@ public:
 
     const char *fragmentShaderSource = "#version 330 core\n"
                                        "out vec4 FragColor;\n"
-                                       "uniform vec3 wallColor;\n"
+                                       "uniform vec4 wallColor;\n"
                                        "void main()\n"
                                        "{\n"
-                                       "    FragColor = vec4(wallColor, 1.0);\n"
+                                       "    FragColor = wallColor;\n"
                                        "}\n";
 
     unsigned int vertexShader;
@@ -62,6 +93,7 @@ public:
     void checkShaderCompilation(unsigned int intshader);
     void checkProgramLinking(unsigned int program);
     void createShaderProgram();
+    void changeMap();
     void processInput(const Uint8* keys, float deltaTime);
     void processMouseInput(float xOffset, float deltaTime);
     void setupBuffers();
