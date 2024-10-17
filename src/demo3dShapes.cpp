@@ -19,11 +19,13 @@ Demo3dShapes::~Demo3dShapes() {}
 
 void Demo3dShapes::processEvents() {}
 
-void Demo3dShapes::initializeGraphics() {}
+void Demo3dShapes::initializeGraphics()
+{
+    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
+}
 
 void Demo3dShapes::renderGraphics()
 {
-    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
     glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 }

@@ -115,11 +115,12 @@ void Demo2dShapes::initializeGraphics()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
 }
 
 void Demo2dShapes::renderGraphics()
 {
-    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
     glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
