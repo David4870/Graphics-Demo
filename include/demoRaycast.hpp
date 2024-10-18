@@ -5,6 +5,10 @@
 #include "app.hpp"
 #include "demo.hpp"
 
+#define TOTAL_MAPS 3
+#define MAP_WIDTH 10
+#define MAP_HEIGHT 10
+
 class DemoRaycast : public Demo
 {
 public:
@@ -12,39 +16,20 @@ public:
     ImVec4 m_SouthNorthColor;
     ImVec4 m_EastWestColor;
 
-    static const int m_MapWidth = 10;
-    static const int m_MapHeight = 10;
+    std::vector<const char*> m_MapNames;
+    int m_MapSelected;
 
-    std::vector<const char*> m_Items;
-    int m_MapSelectedIndex;
+    int m_Maps[TOTAL_MAPS][MAP_WIDTH][MAP_HEIGHT];
 
-    int m_Maps[3][m_MapWidth][m_MapHeight];
+    float m_PosX, m_PosY;
+    float m_DirX, m_DirY;
+    float m_PlaneX, m_PlaneY;
 
-    float m_PosX = 3.0;
-    float m_PosY = 3.0;
-    float m_DirX = -1.0;
-    float m_DirY = 0.0;
-    float m_PlaneX = 0.0;
-    float m_PlaneY = 0.66;
+    float m_MoveSpeed; 
+    float m_RotSpeed;  
 
-    float m_MoveSpeed = 30.0f; 
-    float m_RotSpeed = 2.0f;  
-
-    const char *m_VertexShaderSource = "#version 330 core\n"
-                                     "layout(location = 0) in vec2 aPos;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "  gl_Position = vec4(aPos, 0.0, 1.0);\n"
-                                     "}\n";
-
-    const char *m_FragmentShaderSource = "#version 330 core\n"
-                                       "out vec4 FragColor;\n"
-                                       "uniform vec4 wallColor;\n"
-                                       "void main()\n"
-                                       "{\n"
-                                       "    FragColor = wallColor;\n"
-                                       "}\n";
-
+    const char *m_VertexShaderSource;
+    const char *m_FragmentShaderSource;
     unsigned int m_VertexShader;
     unsigned int m_FragmentShader;
     unsigned int m_ShaderProgram;

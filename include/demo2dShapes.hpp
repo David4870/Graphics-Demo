@@ -25,7 +25,7 @@ protected:
 
 private:
     std::vector<Polygon> m_Polygons;
-    std::vector<const char*> m_Shapes;
+    std::vector<const char*> m_ShapeNames;
     int m_SelectedShape;
 
     ImVec4 m_ClearColor;

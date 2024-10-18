@@ -19,18 +19,42 @@ DemoRaycast::DemoRaycast()
     m_SouthNorthColor = ImVec4(200.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f);
     m_EastWestColor = ImVec4(178.0f / 255.0f, 178.0f / 255.0f, 178.0f / 255.0f, 255.0f / 255.0f);
 
-    m_Items = {"Cube", "Maze", "Rooms"};
-
-    m_MapSelectedIndex = 0;
+    m_MapNames = {"Cube", "Maze", "Rooms"};
+    m_MapSelected = 0;
 
     loadMaps();
+
+    m_PosX = 3.0;
+    m_PosY = 3.0;
+    m_DirX = -1.0;
+    m_DirY = 0.0;
+    m_PlaneX = 0.0;
+    m_PlaneY = 0.66;
+
+    m_MoveSpeed = 30.0f; 
+    m_RotSpeed = 2.0f;  
+
+    m_VertexShaderSource = "#version 330 core\n"
+                                     "layout(location = 0) in vec2 aPos;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "  gl_Position = vec4(aPos, 0.0, 1.0);\n"
+                                     "}\n";
+
+    m_FragmentShaderSource = "#version 330 core\n"
+                                       "out vec4 FragColor;\n"
+                                       "uniform vec4 wallColor;\n"
+                                       "void main()\n"
+                                       "{\n"
+                                       "    FragColor = wallColor;\n"
+                                       "}\n";
 }
 
 DemoRaycast::~DemoRaycast() {}
 
 void DemoRaycast::loadMaps()
 {
-    int mapsToLoad[3][m_MapWidth][m_MapHeight] = {
+    int mapsToLoad[TOTAL_MAPS][MAP_WIDTH][MAP_HEIGHT] = {
         {
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -153,23 +177,23 @@ void DemoRaycast::processInput(const Uint8* keys, float deltaTime)
 
     if (keys[SDL_SCANCODE_W])
     {
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX + m_DirX * moveStep)][int(m_PosY)] == 0) m_PosX += m_DirX * moveStep;
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX)][int(m_PosY + m_DirY * moveStep)] == 0) m_PosY += m_DirY * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX + m_DirX * moveStep)][int(m_PosY)] == 0) m_PosX += m_DirX * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX)][int(m_PosY + m_DirY * moveStep)] == 0) m_PosY += m_DirY * moveStep;
     }
     if (keys[SDL_SCANCODE_S])
     {
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX - m_DirX * moveStep)][int(m_PosY)] == 0) m_PosX -= m_DirX * moveStep;
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX)][int(m_PosY - m_DirY * moveStep)] == 0) m_PosY -= m_DirY * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX - m_DirX * moveStep)][int(m_PosY)] == 0) m_PosX -= m_DirX * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX)][int(m_PosY - m_DirY * moveStep)] == 0) m_PosY -= m_DirY * moveStep;
     }
     if (keys[SDL_SCANCODE_A])
     {
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX - m_PlaneX * moveStep)][int(m_PosY)] == 0) m_PosX -= m_PlaneX * moveStep;
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX)][int(m_PosY - m_PlaneY * moveStep)] == 0) m_PosY -= m_PlaneY * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX - m_PlaneX * moveStep)][int(m_PosY)] == 0) m_PosX -= m_PlaneX * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX)][int(m_PosY - m_PlaneY * moveStep)] == 0) m_PosY -= m_PlaneY * moveStep;
     }
     if (keys[SDL_SCANCODE_D])
     {
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX + m_PlaneX * moveStep)][int(m_PosY)] == 0) m_PosX += m_PlaneX * moveStep;
-        if (m_Maps[m_MapSelectedIndex][int(m_PosX)][int(m_PosY + m_PlaneY * moveStep)] == 0) m_PosY += m_PlaneY * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX + m_PlaneX * moveStep)][int(m_PosY)] == 0) m_PosX += m_PlaneX * moveStep;
+        if (m_Maps[m_MapSelected][int(m_PosX)][int(m_PosY + m_PlaneY * moveStep)] == 0) m_PosY += m_PlaneY * moveStep;
     }
 }
 
@@ -244,7 +268,7 @@ void DemoRaycast::renderScene(int windowWidth, int windowHeight)
                 mapY += stepY;
                 side = 1;
             }
-            if (m_Maps[m_MapSelectedIndex][mapX][mapY] > 0) hit = 1;
+            if (m_Maps[m_MapSelected][mapX][mapY] > 0) hit = 1;
         }
 
         if (side == 0) perpWallDist = (mapX - m_PosX + (1 - stepX) / 2) / rayDirX;
@@ -354,16 +378,16 @@ void DemoRaycast::renderInterface()
                 ImGui::ColorPicker4("East/West color", (float *)&m_EastWestColor, flags);
             }
 
-            const char *combo_preview_value = m_Items[m_MapSelectedIndex];
+            const char *combo_preview_value = m_MapNames[m_MapSelected];
             static ImGuiComboFlags flags = 0;
             ImGui::SeparatorText("Map Selection");
             if (ImGui::BeginCombo(" ", combo_preview_value, flags))
             {
-                for (int n = 0; n < m_Items.size(); n++)
+                for (int n = 0; n < m_MapNames.size(); n++)
                 {
-                    const bool is_selected = (m_MapSelectedIndex == n);
-                    if (ImGui::Selectable(m_Items[n], is_selected))
-                        m_MapSelectedIndex = n;
+                    const bool is_selected = (m_MapSelected == n);
+                    if (ImGui::Selectable(m_MapNames[n], is_selected))
+                        m_MapSelected = n;
 
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                     if (is_selected)

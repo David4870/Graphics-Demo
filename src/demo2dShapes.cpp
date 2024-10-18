@@ -15,7 +15,7 @@
 
 Demo2dShapes::Demo2dShapes()
 {
-    m_Shapes = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
+    m_ShapeNames = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
     m_SelectedShape = 0;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
@@ -171,16 +171,16 @@ void Demo2dShapes::renderInterface()
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
 
-            const char *comboPreviewValue = m_Shapes[m_SelectedShape];
+            const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
 
             ImGui::SeparatorText("Shape Selection");
             if (ImGui::BeginCombo(" ", comboPreviewValue, flags))
             {
-                for (int n = 0; n < m_Shapes.size(); n++)
+                for (int n = 0; n < m_ShapeNames.size(); n++)
                 {
                     const bool isSelected = (m_SelectedShape == n);
-                    if (ImGui::Selectable(m_Shapes[n], isSelected))
+                    if (ImGui::Selectable(m_ShapeNames[n], isSelected))
                         m_SelectedShape = n;
 
                     if (isSelected)
