@@ -27,7 +27,7 @@ void App::initialize()
 {
     initializeSDL();
 
-    context::window = SDL_CreateWindow("Graphics-Demo", context::WINDOW_WIDTH, context::WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
+    context::window = SDL_CreateWindow("Graphics-Demo", context::windowWidth, context::windowHeight, SDL_WINDOW_OPENGL);
     if (context::window == nullptr) {
         std::cout << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl; 
     }

@@ -21,7 +21,7 @@ void Demo3dShapes::processEvents() {}
 
 void Demo3dShapes::initializeGraphics()
 {
-    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
+    glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
 
 void Demo3dShapes::renderGraphics()

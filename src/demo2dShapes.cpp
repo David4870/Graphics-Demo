@@ -116,7 +116,7 @@ void Demo2dShapes::initializeGraphics()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
+    glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
 
 void Demo2dShapes::renderGraphics()
