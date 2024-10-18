@@ -1,16 +1,17 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-
 class App
 {
 public:
     App();
     ~App();
     static void processEvents();
+    static void startImGuiFrame();
+    static void endImGuiFrame();
     void run();
 
 private:
+    static void processAppEvents();
     void initialize();
-    void quit();
+    void terminate();
 };

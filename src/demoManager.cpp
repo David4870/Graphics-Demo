@@ -1,34 +1,40 @@
 #include "demoManager.hpp"
 
-void DemoManager::setNext(Demo *newDemo)
+void DemoManager::processDemoEvents()
 {
-    currentDemo = newDemo;
-    if (currentDemo != nullptr)
-    {
-        isDemoChanged = true;
-    }
+    m_CurrentDemo->processEvents();
 }
 
-bool DemoManager::isChanged()
+void DemoManager::setNext(Demo *newDemo)
 {
-    return isDemoChanged;
+    m_CurrentDemo = newDemo;
+    assert(m_CurrentDemo != nullptr && "Next demo was not successfully set!");
+    m_IsDemoChanged = true;
 }
 
 void DemoManager::triggerNext()
 {
-    if (isDemoChanged)
+    if (m_IsDemoChanged)
     {
-        isDemoChanged = false;
+        m_IsDemoChanged = false;
         context::running = true;
 
-        currentDemo->initializeGraphics();
-
-        currentDemo->run();
+        m_CurrentDemo->run();
     }
 }
 
-bool DemoManager::isDemoChanged;
-Demo *DemoManager::currentDemo = nullptr;
-Demo2dShapes DemoManager::demo2dShapes;
-Demo3dShapes DemoManager::demo3dShapes;
-DemoRaycast DemoManager::demoRaycast;
+bool DemoManager::demoShouldEnd()
+{
+    if (m_IsDemoChanged)
+    {
+        context::running = false;
+    }
+
+    return !context::running;
+}
+
+bool DemoManager::m_IsDemoChanged;
+Demo *DemoManager::m_CurrentDemo = nullptr;
+DemoRaycast DemoManager::m_DemoRaycast;
+Demo2dShapes DemoManager::m_Demo2dShapes;
+Demo3dShapes DemoManager::m_Demo3dShapes;
