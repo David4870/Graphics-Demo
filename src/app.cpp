@@ -23,9 +23,31 @@ App::~App()
     terminate();
 }
 
+void App::setWindowSize()
+{
+    float resolutionMultiplier = 1.2f;
+
+    const SDL_DisplayMode* dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+    int NATIVE_DISPLAY_RES = dm->w * dm->h;
+    int FULL_HD_RES = 1920 * 1080;
+
+    if (NATIVE_DISPLAY_RES > FULL_HD_RES)
+    {
+        context::windowWidth = 1920;
+        context::windowHeight = 1080;
+    }
+    else
+    {
+        context::windowWidth  = 1280 * resolutionMultiplier;
+        context::windowHeight = 720 * resolutionMultiplier;
+    }
+}
+
 void App::initialize()
 {
     initializeSDL();
+
+    setWindowSize();
 
     context::window = SDL_CreateWindow("Graphics-Demo", context::windowWidth, context::windowHeight, SDL_WINDOW_OPENGL);
     if (context::window == nullptr) {

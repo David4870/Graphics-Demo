@@ -12,6 +12,7 @@ public:
 
 private:
     static void processAppEvents();
+    void setWindowSize();
     void initialize();
     void terminate();
 };

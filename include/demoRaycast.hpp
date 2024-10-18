@@ -2,7 +2,6 @@
 
 #include <imgui.h>
 
-#include "app.hpp"
 #include "demo.hpp"
 
 #define TOTAL_MAPS 3
