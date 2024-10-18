@@ -2,51 +2,53 @@
 
 #include <GL/glew.h>
 
-#include <imgui.h>
-#include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+#include "app.hpp"
+#include "appContext.hpp"
 #include "demo.hpp"
 #include "demoManager.hpp"
 #include "demo3dShapes.hpp"
-#include "appContext.hpp"
+
+Demo3dShapes::Demo3dShapes()
+{
+    m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
+}
+
+Demo3dShapes::~Demo3dShapes() {}
+
+void Demo3dShapes::processEvents() {}
 
 void Demo3dShapes::initializeGraphics()
 {
-
+    glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
 
 void Demo3dShapes::renderGraphics()
 {
-    glViewport(400, 0, context::WINDOW_WIDTH - 400, context::WINDOW_HEIGHT);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Demo3dShapes::renderInterface()
 {
-    // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
+    App::startImGuiFrame();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
-    // We specify a default position/size in case there's no data in the .ini file.
-    // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
-    const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y));
+    const ImGuiViewport *mainViewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(400, 1080));
-    ImGui::Begin("DemosAndParameters", nullptr, flags); // Create the demo selection and parameter window.
-    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-    if (ImGui::BeginTabBar("Demos", tab_bar_flags))
+    ImGui::Begin("DemosAndParameters", nullptr, flags);
+    ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
+    if (ImGui::BeginTabBar("Demos", tabBarFlags))
     {
         static bool isTabActive = false;
         if (ImGui::BeginTabItem("2D Shapes"))
         {
             if (!isTabActive)
             {
-                DemoManager::setNext(&DemoManager::demo2dShapes);
+                DemoManager::setNext(&DemoManager::m_Demo2dShapes);
             }
             ImGui::EndTabItem();
         }
@@ -56,21 +58,32 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Raycast"))
+        {
+            if (!isTabActive)
+            {
+                DemoManager::setNext(&DemoManager::m_DemoRaycast);
+            }
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
-    ImGui::End();
 
-    ImGui::Render();
+    App::endImGuiFrame();
 }
 
-void Demo3dShapes::deallocateOpenGLData()
+void Demo3dShapes::deallocateGraphicsData() {}
+
+void Demo3dShapes::startNextDemo()
 {
     DemoManager::triggerNext();
 }
 
 void Demo3dShapes::run()
 {
-    while (context::running)
+    initializeGraphics();
+
+    while (!DemoManager::demoShouldEnd())
     {
         App::processEvents();
 
@@ -79,10 +92,8 @@ void Demo3dShapes::run()
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(context::window);
-        if (DemoManager::isChanged())
-        {
-            context::running = false;
-        }
     }
-    deallocateOpenGLData();
+
+    deallocateGraphicsData();
+    startNextDemo();
 }
