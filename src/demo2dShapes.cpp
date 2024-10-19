@@ -132,7 +132,7 @@ void Demo2dShapes::renderGraphics()
     // move and rotate our shape
     glm::mat4 m_Trans = glm::mat4(1.0f);
 
-    m_Trans = glm::translate(m_Trans, glm::vec3(m_ShapePos.x, m_ShapePos.y, 0.0)); 
+    m_Trans = glm::translate(m_Trans, glm::vec3(m_ShapePos.x, m_ShapePos.y, 0.0));
     m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
     m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
     m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.z), glm::vec3(0.0f, 0.0f, 1.0f));

@@ -24,8 +24,8 @@ public:
     float m_DirX, m_DirY;
     float m_PlaneX, m_PlaneY;
 
-    float m_MoveSpeed; 
-    float m_RotSpeed;  
+    float m_MoveSpeed;
+    float m_RotSpeed;
 
     const char *m_VertexShaderSource;
     const char *m_FragmentShaderSource;

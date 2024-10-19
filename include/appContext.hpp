@@ -5,7 +5,7 @@
 namespace context
 {
     inline int windowWidth = 1920;
-    inline int windowHeight = 1080; 
+    inline int windowHeight = 1080;
     inline bool running;
     inline SDL_Event event;
     inline SDL_Window *window;
