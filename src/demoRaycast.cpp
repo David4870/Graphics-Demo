@@ -30,8 +30,8 @@ DemoRaycast::DemoRaycast()
     m_PlaneX = 0.0;
     m_PlaneY = 0.66;
 
-    m_MoveSpeed = 30.0f; 
-    m_RotSpeed = 2.0f;  
+    m_MoveSpeed = 30.0f;
+    m_RotSpeed = 2.0f;
 
     m_VertexShaderSource = "#version 330 core\n"
                                      "layout(location = 0) in vec2 aPos;\n"

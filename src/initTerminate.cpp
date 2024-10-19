@@ -11,7 +11,7 @@ void initializeGLEW()
     GLenum err = glewInit();
     if (err != GLEW_OK)
     {
-        std::cout << "Error: glewGetErrorString(): " << SDL_GetError() << std::endl; 
+        std::cout << "Error: glewGetErrorString(): " << SDL_GetError() << std::endl;
     }
 }
 
@@ -19,7 +19,7 @@ void initializeSDL()
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
-        std::cout << "Error: SDL_Init(): " << SDL_GetError() << std::endl; 
+        std::cout << "Error: SDL_Init(): " << SDL_GetError() << std::endl;
     }
 }
 

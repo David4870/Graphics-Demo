@@ -51,13 +51,13 @@ void App::initialize()
 
     context::window = SDL_CreateWindow("Graphics-Demo", context::windowWidth, context::windowHeight, SDL_WINDOW_OPENGL);
     if (context::window == nullptr) {
-        std::cout << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl; 
+        std::cout << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl;
     }
 
     context::glContext = SDL_GL_CreateContext(context::window);
     if (context::glContext == nullptr)
     {
-        std::cout << "Error: SDL_GL_CreateContext():" << SDL_GetError() << std::endl; 
+        std::cout << "Error: SDL_GL_CreateContext():" << SDL_GetError() << std::endl;
     }
 
     initializeGLEW();
