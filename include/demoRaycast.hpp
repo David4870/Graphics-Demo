@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include <imgui.h>
 
 #include "demo.hpp"
@@ -15,7 +17,7 @@ public:
     ImVec4 m_SouthNorthColor;
     ImVec4 m_EastWestColor;
 
-    std::vector<const char*> m_MapNames;
+    std::array<const char*, 3> m_MapNames;
     int m_MapSelected;
 
     int m_Maps[TOTAL_MAPS][MAP_WIDTH][MAP_HEIGHT];
