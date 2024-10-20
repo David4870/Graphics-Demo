@@ -18,6 +18,7 @@ Demo3dShapes::Demo3dShapes()
     m_ShapeNames = {"Cube", "Cylinder", "Sphere", "Torus"};
     m_SelectedShape = 0;
     m_Wireframe = false;
+    m_ColorRandom = false;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
@@ -211,11 +212,12 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
+            ImGui::Checkbox("Random color", &m_ColorRandom);
 
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
 
-            ImGui::SeparatorText("Shape Selection");
+            ImGui::SeparatorText("Shape selection");
             if (ImGui::BeginCombo(" ", comboPreviewValue, flags))
             {
                 for (int n = 0; n < m_ShapeNames.size(); n++)
@@ -284,11 +286,24 @@ void Demo3dShapes::deallocateGraphicsData()
     glDeleteProgram(m_ShaderProgram);
 }
 
+void Demo3dShapes::randomizeColor()
+{
+    if (m_ColorRandom)
+    {
+        Uint64 time = SDL_GetTicks() / 1000.f;
+
+        m_Color.x = (std::sin(time) + 1) / 2.0f;
+        m_Color.y = (std::sin(time / 2) + 1) / 2.0f;
+        m_Color.z = (std::sin(time / 3) + 1) / 2.0f;
+    }
+}
+
 void Demo3dShapes::resetParameters()
 {
     m_ShapePos = glm::vec2(0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
     m_Wireframe = false;
+    m_ColorRandom = false;
 }
 
 void Demo3dShapes::startNextDemo()
@@ -306,6 +321,7 @@ void Demo3dShapes::run()
     {
         App::processEvents();
 
+        randomizeColor();
         renderInterface();
         renderGraphics();
 

@@ -187,7 +187,7 @@ void Demo2dShapes::renderInterface()
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
 
-            ImGui::SeparatorText("Shape Selection");
+            ImGui::SeparatorText("Shape selection");
             if (ImGui::BeginCombo(" ", comboPreviewValue, flags))
             {
                 for (int n = 0; n < m_ShapeNames.size(); n++)
@@ -267,6 +267,7 @@ void Demo2dShapes::resetParameters()
     m_ShapePos = glm::vec2(0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
     m_Wireframe = false;
+    m_ColorRandom = false;
 }
 
 void Demo2dShapes::startNextDemo()
