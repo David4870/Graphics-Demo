@@ -17,6 +17,7 @@ Demo2dShapes::Demo2dShapes()
 {
     m_ShapeNames = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
     m_SelectedShape = 0;
+    m_Wireframe = false;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
@@ -124,6 +125,15 @@ void Demo2dShapes::renderGraphics()
     glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    if (m_Wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     // draw our shape
     glUseProgram(m_ShaderProgram);
     int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
@@ -196,11 +206,13 @@ void Demo2dShapes::renderInterface()
             ImGui::SliderFloat("x rotation", &m_ShapeRot.x, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("y rotation", &m_ShapeRot.y, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("z rotation", &m_ShapeRot.z, 0.0f, 360.0f, "%.3f");
+            ImGui::SeparatorText("Polygon mode");
+            ImGui::Checkbox("Wireframe", &m_Wireframe);
 
+            ImGui::Separator();
             if (ImGui::Button("Reset"))
             {
-                m_ShapePos = glm::vec2(0.0f, 0.0f);
-                m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+                resetParameters();
             }
             ImGui::EndTabItem();
         }
@@ -235,8 +247,16 @@ void Demo2dShapes::deallocateGraphicsData()
     glDeleteProgram(m_ShaderProgram);
 }
 
+void Demo2dShapes::resetParameters()
+{
+    m_ShapePos = glm::vec2(0.0f, 0.0f);
+    m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_Wireframe = false;
+}
+
 void Demo2dShapes::startNextDemo()
 {
+    resetParameters();
     DemoManager::triggerNext();
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -25,8 +26,9 @@ protected:
 
 private:
     std::vector<Polygon> m_Polygons;
-    std::vector<const char*> m_ShapeNames;
+    std::array<const char*, 6> m_ShapeNames;
     int m_SelectedShape;
+    bool m_Wireframe;
 
     ImVec4 m_ClearColor;
     ImVec4 m_Color;
@@ -42,4 +44,6 @@ private:
     unsigned int m_ShaderProgram;
 
     unsigned int m_VBO, m_VAO, m_EBO;
+
+    void resetParameters();
 };
