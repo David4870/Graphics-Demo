@@ -16,3 +16,6 @@ struct Polygon
 Polygon polygon2dCreate(float n, float a, float b, float r);
 
 Polygon prismCreate(float baseRadius, float topRadius, float height, int sectors, int stacks, bool smooth, int upAxis);
+Polygon coneCreate(float baseRadius, float height, int sectors, int stacks, bool smooth, int upAxis);
+Polygon sphereCreate(float radius, int sectors, int stacks, bool smooth, int upAxis);
+Polygon torusCreate(float majorRadius, float minorRadius, int sectors, int sides, bool smooth, int upAxis);

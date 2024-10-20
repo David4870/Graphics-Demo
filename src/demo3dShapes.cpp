@@ -15,7 +15,7 @@
 
 Demo3dShapes::Demo3dShapes()
 {
-    m_ShapeNames = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
+    m_ShapeNames = {"Cube", "Cylinder", "Sphere", "Torus"};
     m_SelectedShape = 0;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
@@ -25,7 +25,10 @@ Demo3dShapes::Demo3dShapes()
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
 
     m_Polygons = {
-        prismCreate(0.5f, 0.5f, 1.0f, 100, 1, false, 2)
+        prismCreate(0.5f, 0.5f, 0.7f, 4, 1, false, 2),      // Cube
+        prismCreate(0.5f, 0.5f, 1.0f, 100, 1, false, 2),    // Cylinder
+        sphereCreate(0.5, 36, 18, false, 2),                // Sphere
+        torusCreate(0.5f, 0.25f, 36, 18, false, 2)          // Torus
     };
 
     m_VertexShaderSource = "#version 330 core\n"
@@ -157,6 +160,13 @@ void Demo3dShapes::renderGraphics()
     int projectionLoc = glGetUniformLocation(m_ShaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+    // Update selected shape
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, m_Polygons[m_SelectedShape].vertices.size() * sizeof(float), m_Polygons[m_SelectedShape].vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(unsigned int), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
+
     glBindVertexArray(m_VAO);
 
     glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
@@ -168,9 +178,6 @@ void Demo3dShapes::renderInterface()
     App::startImGuiFrame();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
-
-    // NOTE: REMOVE THIS SHIT
-    ImGui::ShowDemoWindow();
 
     const ImGuiViewport *mainViewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y));
@@ -194,6 +201,24 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
+
+            const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
+            static ImGuiComboFlags flags = 0;
+
+            ImGui::SeparatorText("Shape Selection");
+            if (ImGui::BeginCombo(" ", comboPreviewValue, flags))
+            {
+                for (int n = 0; n < m_ShapeNames.size(); n++)
+                {
+                    const bool isSelected = (m_SelectedShape == n);
+                    if (ImGui::Selectable(m_ShapeNames[n], isSelected))
+                        m_SelectedShape = n;
+
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
 
             ImGui::SeparatorText("Position");
             ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");

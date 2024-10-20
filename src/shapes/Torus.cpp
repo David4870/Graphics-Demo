@@ -1,21 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Torus.cpp
-// =========
-// Torus geometry for OpenGL with (majorR, minorR, sectors, sides) parameters
-// The minimum # of sectors and sides are 2. If the sides=2, the shape is a
-// disk with a hole in the ceter.
-// - major radius(R): distance from the origin to the centre of the tube
-// - minor radius(r): radius of the tube
-// - sectors: # of sectors of the tube
-// - sides: # of sides of the tube
-// - smooth: smooth (default) or flat shading
-// - up-axis: facing direction, X=1, Y=2, Z=3(default)
-//
-//  AUTHOR: Song Ho Ahn (song.ahn@gmail.com)
-// CREATED: 2023-03-12
-// UPDATED: 2024-07-19
-///////////////////////////////////////////////////////////////////////////////
-
 #ifdef _WIN32
 #include <windows.h>    // include windows.h to avoid thousands of compile errors even though this class is not depending on Windows
 #endif

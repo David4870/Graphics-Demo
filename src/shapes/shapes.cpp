@@ -44,3 +44,21 @@ Polygon prismCreate(float baseRadius, float topRadius, float height, int sectors
     Cylinder cylinder(baseRadius, topRadius, height, sectors, stacks, smooth, upAxis);
     return { cylinder.vertices, cylinder.indices };
 }
+
+Polygon coneCreate(float baseRadius, float height, int sectors, int stacks, bool smooth, int upAxis)
+{
+    Torus torus(baseRadius, height, sectors, stacks, smooth, upAxis);
+    return { torus.vertices, torus.indices };
+}
+
+Polygon sphereCreate(float radius, int sectors, int stacks, bool smooth, int upAxis)
+{
+    Sphere sphere(radius, sectors, stacks, smooth, upAxis);
+    return { sphere.vertices, sphere.indices };
+}
+
+Polygon torusCreate(float majorRadius, float minorRadius, int sectors, int sides, bool smooth, int upAxis)
+{
+    Torus torus(majorRadius, minorRadius, sectors, sides, smooth, upAxis);
+    return { torus.vertices, torus.indices };
+}

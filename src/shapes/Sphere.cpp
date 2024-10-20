@@ -1,16 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Sphere.cpp
-// ==========
-// Sphere for OpenGL with (radius, sectors, stacks)
-// The min number of sectors is 2 and the min number of stacks are 2.
-// The default up axis is +Z axis. You can change the up axis with setUpAxis():
-// X=1, Y=2, Z=3.
-//
-//  AUTHOR: Song Ho Ahn (song.ahn@gmail.com)
-// CREATED: 2017-11-01
-// UPDATED: 2024-07-19
-///////////////////////////////////////////////////////////////////////////////
-
 #ifdef _WIN32
 #include <windows.h>    // include windows.h to avoid thousands of compile errors even though this class is not depending on Windows
 #endif

@@ -1,16 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Sphere.h
-// ========
-// Sphere for OpenGL with (radius, sectors, stacks)
-// The min number of sectors is 2 and the min number of stacks are 2.
-// The default up axis is +Z axis. You can change the up axis with setUpAxis():
-// X=1, Y=2, Z=3.
-//
-//  AUTHOR: Song Ho Ahn (song.ahn@gmail.com)
-// CREATED: 2017-11-01
-// UPDATED: 2024-07-19
-///////////////////////////////////////////////////////////////////////////////
-
 #ifndef GEOMETRY_SPHERE_H
 #define GEOMETRY_SPHERE_H
 
@@ -68,6 +55,15 @@ public:
     // debug
     void printSelf() const;
 
+    std::vector<float> vertices;
+    std::vector<float> normals;
+    std::vector<float> texCoords;
+    std::vector<unsigned int> indices;
+
+    // interleaved
+    std::vector<float> interleavedVertices;
+    int interleavedStride;                  // # of bytes to hop to the next vertex (should be 32 bytes)
+
 protected:
 
 private:
@@ -91,16 +87,7 @@ private:
     int stackCount;                         // latitude, # of stacks
     bool smooth;
     int upAxis;                             // +X=1, +Y=2, +z=3 (default)
-    std::vector<float> vertices;
-    std::vector<float> normals;
-    std::vector<float> texCoords;
-    std::vector<unsigned int> indices;
     std::vector<unsigned int> lineIndices;
-
-    // interleaved
-    std::vector<float> interleavedVertices;
-    int interleavedStride;                  // # of bytes to hop to the next vertex (should be 32 bytes)
-
 };
 
 #endif

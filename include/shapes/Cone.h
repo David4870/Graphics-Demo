@@ -1,20 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Cone.h
-// ======
-// Cone for OpenGL with (base radius, height, sectors, stacks)
-// The min number of sectors is 2 and the min number of stacks are 1.
-// - base radius: the radius of the base circle at z = -height/2
-// - height     : the height of the cone along z-axis
-// - sectors    : the number of sides of the base circle
-// - stacks     : the number of subdivisions along z-axis
-// - smooth     : surface shading smooth(true, default) or flat(false)
-// - up-axis    : top surface facing: X=1, Y=2, Z=3(default)
-//
-//  AUTHOR: Song Ho Ahn (song.ahn@gmail.com)
-// CREATED: 2023-03-12
-// UPDATED: 2024-07-19
-///////////////////////////////////////////////////////////////////////////////
-
 #ifndef GEOMETRY_CONE_H
 #define GEOMETRY_CONE_H
 
@@ -82,6 +65,15 @@ public:
     // debug
     void printSelf() const;
 
+    std::vector<float> vertices;
+    std::vector<float> normals;
+    std::vector<float> texCoords;
+    std::vector<unsigned int> indices;
+
+    // interleaved
+    std::vector<float> interleavedVertices;
+    int interleavedStride;                  // # of bytes to hop to the next vertex (should be 32 bytes)
+
 protected:
 
 private:
@@ -111,16 +103,7 @@ private:
     int upAxis;                             // X=1, Y=2, Z=3(default)
 
     std::vector<float> unitCircleVertices;
-    std::vector<float> vertices;
-    std::vector<float> normals;
-    std::vector<float> texCoords;
-    std::vector<unsigned int> indices;
     std::vector<unsigned int> lineIndices;
-
-    // interleaved
-    std::vector<float> interleavedVertices;
-    int interleavedStride;                  // # of bytes to hop to the next vertex (should be 32 bytes)
-
 };
 
 #endif
