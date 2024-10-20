@@ -13,11 +13,13 @@
 #include "demo2dShapes.hpp"
 #include "polygon.hpp"
 
+
 Demo2dShapes::Demo2dShapes()
 {
     m_ShapeNames = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
     m_SelectedShape = 0;
     m_Wireframe = false;
+    m_ColorRandom = false;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
@@ -35,20 +37,20 @@ Demo2dShapes::Demo2dShapes()
     };
 
     m_VertexShaderSource = "#version 330 core\n"
-                                     "layout (location = 0) in vec3 aPos;\n"
-                                     "uniform mat4 transform;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "   gl_Position = transform * vec4(aPos, 1.0);\n"
-                                     "}\0";
+                           "layout (location = 0) in vec3 aPos;\n"
+                           "uniform mat4 transform;\n"
+                           "void main()\n"
+                           "{\n"
+                           "    gl_Position = transform * vec4(aPos, 1.0);\n"
+                           "}\n\0";
 
     m_FragmentShaderSource = "#version 330 core\n"
-                                       "out vec4 FragColor;\n"
-                                       "uniform vec4 ourColor;\n"
-                                       "void main()\n"
-                                       "{\n"
-                                       "   FragColor = ourColor;\n"
-                                       "}\n\0";
+                             "out vec4 FragColor;\n"
+                             "uniform vec4 ourColor;\n"
+                             "void main()\n"
+                             "{\n"
+                             "   FragColor = ourColor;\n"
+                             "}\n\0";
 }
 
 Demo2dShapes::~Demo2dShapes() {}
@@ -180,6 +182,7 @@ void Demo2dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
+            ImGui::Checkbox("Random color", &m_ColorRandom);
 
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
@@ -247,6 +250,18 @@ void Demo2dShapes::deallocateGraphicsData()
     glDeleteProgram(m_ShaderProgram);
 }
 
+void Demo2dShapes::randomizeColor()
+{
+    if (m_ColorRandom)
+    {
+        Uint64 time = SDL_GetTicks() / 1000.f;
+
+        m_Color.x = (std::sin(time) + 1) / 2.0f;
+        m_Color.y = (std::sin(time / 2) + 1) / 2.0f;
+        m_Color.z = (std::sin(time / 3) + 1) / 2.0f;
+    }
+}
+
 void Demo2dShapes::resetParameters()
 {
     m_ShapePos = glm::vec2(0.0f, 0.0f);
@@ -268,6 +283,7 @@ void Demo2dShapes::run()
     {
         App::processEvents();
 
+        randomizeColor();
         renderInterface();
         renderGraphics();
 
