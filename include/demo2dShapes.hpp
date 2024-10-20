@@ -6,7 +6,7 @@
 #include <imgui.h>
 
 #include "demo.hpp"
-#include "polygon.hpp"
+#include "shapes/shapes.hpp"
 
 class Demo2dShapes : public Demo
 {

@@ -1,9 +1,13 @@
 #include <cmath>
 #include <numbers>
 
-#include "polygon.hpp"
+#include "shapes/shapes.hpp"
+#include "shapes/Cylinder.h"
+#include "shapes/Cone.h"
+#include "shapes/Sphere.h"
+#include "shapes/Torus.h"
 
-Polygon polygonCreate(float n, float a, float b, float r)
+Polygon polygon2dCreate(float n, float a, float b, float r)
 {
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
@@ -33,4 +37,10 @@ Polygon polygonCreate(float n, float a, float b, float r)
     indices[indices.size() - 1] = 1;
 
     return { vertices, indices };
+}
+
+Polygon prismCreate(float baseRadius, float topRadius, float height, int sectors, int stacks, bool smooth, int upAxis)
+{
+    Cylinder cylinder(baseRadius, topRadius, height, sectors, stacks, smooth, upAxis);
+    return { cylinder.vertices, cylinder.indices };
 }

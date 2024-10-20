@@ -11,7 +11,7 @@
 #include "appContext.hpp"
 #include "demoManager.hpp"
 #include "demo2dShapes.hpp"
-#include "polygon.hpp"
+#include "shapes/shapes.hpp"
 
 Demo2dShapes::Demo2dShapes()
 {
@@ -25,12 +25,12 @@ Demo2dShapes::Demo2dShapes()
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
 
     m_Polygons = {
-        polygonCreate(3.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(4.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(5.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(6.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(8.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(100.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(3.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(4.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(5.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(6.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(8.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(100.0f, 0.0f, 0.0f, 0.75f),
     };
 
     m_VertexShaderSource = "#version 330 core\n"
@@ -113,8 +113,8 @@ void Demo2dShapes::initializeGraphics()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
