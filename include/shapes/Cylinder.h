@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_CYLINDER_H
-#define GEOMETRY_CYLINDER_H
+#pragma once
 
 #include <vector>
 
@@ -114,5 +113,3 @@ private:
 
 
 };
-
-#endif

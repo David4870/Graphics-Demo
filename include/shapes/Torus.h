@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_TORUS_H
-#define GEOMETRY_TORUS_H
+#pragma once
 
 #include <vector>
 
@@ -92,5 +91,3 @@ private:
     int upAxis;                             // +X=1, +Y=2, +z=3 (default)
     std::vector<unsigned int> lineIndices;
 };
-
-#endif

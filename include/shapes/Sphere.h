@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_SPHERE_H
-#define GEOMETRY_SPHERE_H
+#pragma once
 
 #include <vector>
 
@@ -89,5 +88,3 @@ private:
     int upAxis;                             // +X=1, +Y=2, +z=3 (default)
     std::vector<unsigned int> lineIndices;
 };
-
-#endif

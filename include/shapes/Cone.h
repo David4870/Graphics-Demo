@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_CONE_H
-#define GEOMETRY_CONE_H
+#pragma once
 
 #include <vector>
 
@@ -105,5 +104,3 @@ private:
     std::vector<float> unitCircleVertices;
     std::vector<unsigned int> lineIndices;
 };
-
-#endif
