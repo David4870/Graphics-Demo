@@ -18,7 +18,7 @@ Demo3dShapes::Demo3dShapes()
     m_ShapeNames = {"Cube", "Cylinder", "Sphere", "Torus"};
     m_SelectedShape = 0;
     m_Wireframe = false;
-    m_ColorRandom = false;
+    m_Multicolor = false;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
@@ -44,12 +44,24 @@ Demo3dShapes::Demo3dShapes()
                                      "}\0";
 
     m_FragmentShaderSource = "#version 330 core\n"
-                                       "out vec4 FragColor;\n"
-                                       "uniform vec4 ourColor;\n"
-                                       "void main()\n"
-                                       "{\n"
-                                       "   FragColor = ourColor;\n"
-                                       "}\n\0";
+                             "out vec4 FragColor;\n"
+                             "uniform vec4 ourColor;\n"
+                             "uniform vec2 resolution;\n"
+                             "uniform float time;\n"
+                             "uniform bool multicolor;\n"
+                             "void main()\n"
+                             "{\n"
+                             "   vec2 uv = gl_FragCoord.xy / resolution;\n"
+                             "   vec3 col = 0.5 + 0.5 * cos(time * 2.0 + uv.xyx * 5.0 + vec3(0.0, 2.0, 4.0));\n"
+                             "   if (multicolor)\n"
+                             "   {\n"
+                             "      FragColor = vec4(col, 1.0);\n"
+                             "   }\n"
+                             "   else\n"
+                             "   {\n"
+                             "      FragColor = ourColor;\n"
+                             "   }\n"
+                             "}\n";
 }
 
 Demo3dShapes::~Demo3dShapes() {}
@@ -138,10 +150,6 @@ void Demo3dShapes::renderGraphics()
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    glUseProgram(m_ShaderProgram);
-    int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
-    glUniform4f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z, m_Color.w);
-
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(m_ShapePos.x, m_ShapePos.y, 0.0));
     if (m_autoRotate)
@@ -162,13 +170,22 @@ void Demo3dShapes::renderGraphics()
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), 1520.0f / 1080.0f, 0.1f, 100.0f);
 
+    glUseProgram(m_ShaderProgram);
+    int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
+    int timeLocation = glGetUniformLocation(m_ShaderProgram, "time");
+    int resolutionLocation = glGetUniformLocation(m_ShaderProgram, "resolution");
+    int colorRandomLocation = glGetUniformLocation(m_ShaderProgram, "multicolor");
     int modelLoc = glGetUniformLocation(m_ShaderProgram, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
     int viewLoc = glGetUniformLocation(m_ShaderProgram, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
     int projectionLoc = glGetUniformLocation(m_ShaderProgram, "projection");
+
+    float time = SDL_GetTicks() / 1000.0f;
+    glUniform4f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z, m_Color.w);
+    glUniform1f(timeLocation, time);
+    glUniform2f(resolutionLocation, (float)context::windowWidth, (float)context::windowHeight);
+    glUniform1i(colorRandomLocation, m_Multicolor);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     // Update selected shape
@@ -179,9 +196,7 @@ void Demo3dShapes::renderGraphics()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(unsigned int), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(m_VAO);
-
     glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
-
 }
 
 void Demo3dShapes::renderInterface()
@@ -212,7 +227,7 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
-            ImGui::Checkbox("Random color", &m_ColorRandom);
+            ImGui::Checkbox("Multicolor", &m_Multicolor);
 
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
@@ -286,24 +301,12 @@ void Demo3dShapes::deallocateGraphicsData()
     glDeleteProgram(m_ShaderProgram);
 }
 
-void Demo3dShapes::randomizeColor()
-{
-    if (m_ColorRandom)
-    {
-        Uint64 time = SDL_GetTicks() / 1000.f;
-
-        m_Color.x = (std::sin(time) + 1) / 2.0f;
-        m_Color.y = (std::sin(time / 2) + 1) / 2.0f;
-        m_Color.z = (std::sin(time / 3) + 1) / 2.0f;
-    }
-}
-
 void Demo3dShapes::resetParameters()
 {
     m_ShapePos = glm::vec2(0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
     m_Wireframe = false;
-    m_ColorRandom = false;
+    m_Multicolor = false;
 }
 
 void Demo3dShapes::startNextDemo()
@@ -321,7 +324,6 @@ void Demo3dShapes::run()
     {
         App::processEvents();
 
-        randomizeColor();
         renderInterface();
         renderGraphics();
 

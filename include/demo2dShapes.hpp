@@ -29,7 +29,7 @@ private:
     std::array<const char*, 6> m_ShapeNames;
     int m_SelectedShape;
     bool m_Wireframe;
-    bool m_ColorRandom;
+    bool m_Multicolor;
 
     ImVec4 m_ClearColor;
     ImVec4 m_Color;
@@ -46,6 +46,5 @@ private:
 
     unsigned int m_VBO, m_VAO, m_EBO;
 
-    void randomizeColor();
     void resetParameters();
 };
