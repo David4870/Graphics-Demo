@@ -23,7 +23,7 @@ Demo3dShapes::Demo3dShapes()
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
 
-    m_ShapePos = glm::vec2(0.0f, 0.0f);
+    m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
 
     m_Polygons = {
@@ -151,7 +151,7 @@ void Demo3dShapes::renderGraphics()
     }
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(m_ShapePos.x, m_ShapePos.y, 0.0));
+    model = glm::translate(model, glm::vec3(m_ShapePos.x, m_ShapePos.y, m_ShapePos.z));
     if (m_autoRotate)
     {
         model = glm::rotate(model, ((float)SDL_GetTicks() / 500) * glm::radians(m_autoRotSpeed), glm::vec3(0.5f, 1.0f, 0.5f));
@@ -250,6 +250,7 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Position");
             ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("y position", &m_ShapePos.y, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("z position", &m_ShapePos.z, -1.0f, 1.0f, "%.3f");
 
             ImGui::SeparatorText("Rotation");
             ImGui::Checkbox("Auto Rotate", &m_autoRotate);
@@ -303,7 +304,7 @@ void Demo3dShapes::deallocateGraphicsData()
 
 void Demo3dShapes::resetParameters()
 {
-    m_ShapePos = glm::vec2(0.0f, 0.0f);
+    m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
     m_Wireframe = false;
     m_Multicolor = false;
