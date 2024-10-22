@@ -7,7 +7,7 @@
 #include <imgui.h>
 
 #include "demo.hpp"
-#include "polygon.hpp"
+#include "shapes/shapes.hpp"
 
 class Demo2dShapes : public Demo
 {
@@ -28,6 +28,8 @@ private:
     std::vector<Polygon> m_Polygons;
     std::array<const char*, 6> m_ShapeNames;
     int m_SelectedShape;
+    bool m_Wireframe;
+    bool m_Multicolor;
 
     ImVec4 m_ClearColor;
     ImVec4 m_Color;
@@ -43,4 +45,6 @@ private:
     unsigned int m_ShaderProgram;
 
     unsigned int m_VBO, m_VAO, m_EBO;
+
+    void resetParameters();
 };

@@ -11,12 +11,15 @@
 #include "appContext.hpp"
 #include "demoManager.hpp"
 #include "demo2dShapes.hpp"
-#include "polygon.hpp"
+#include "shapes/shapes.hpp"
+
 
 Demo2dShapes::Demo2dShapes()
 {
     m_ShapeNames = {"Triangle", "Rhombus", "Pentagon", "Hexagon", "Octagon", "Circle"};
     m_SelectedShape = 0;
+    m_Wireframe = false;
+    m_Multicolor = false;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
@@ -25,29 +28,41 @@ Demo2dShapes::Demo2dShapes()
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
 
     m_Polygons = {
-        polygonCreate(3.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(4.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(5.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(6.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(8.0f, 0.0f, 0.0f, 0.75f),
-        polygonCreate(100.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(3.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(4.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(5.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(6.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(8.0f, 0.0f, 0.0f, 0.75f),
+        polygon2dCreate(100.0f, 0.0f, 0.0f, 0.75f),
     };
 
     m_VertexShaderSource = "#version 330 core\n"
-                                     "layout (location = 0) in vec3 aPos;\n"
-                                     "uniform mat4 transform;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "   gl_Position = transform * vec4(aPos, 1.0);\n"
-                                     "}\0";
+                           "layout (location = 0) in vec3 aPos;\n"
+                           "uniform mat4 transform;\n"
+                           "void main()\n"
+                           "{\n"
+                           "    gl_Position = transform * vec4(aPos, 1.0);\n"
+                           "}\n\0";
 
     m_FragmentShaderSource = "#version 330 core\n"
-                                       "out vec4 FragColor;\n"
-                                       "uniform vec4 ourColor;\n"
-                                       "void main()\n"
-                                       "{\n"
-                                       "   FragColor = ourColor;\n"
-                                       "}\n\0";
+                             "out vec4 FragColor;\n"
+                             "uniform vec4 ourColor;\n"
+                             "uniform vec2 resolution;\n"
+                             "uniform float time;\n"
+                             "uniform bool multicolor;\n"
+                             "void main()\n"
+                             "{\n"
+                             "   vec2 uv = gl_FragCoord.xy / resolution;\n"
+                             "   vec3 col = 0.5 + 0.5 * cos(time * 2.0 + uv.xyx * 5.0 + vec3(0.0, 2.0, 4.0));\n"
+                             "   if (multicolor)\n"
+                             "   {\n"
+                             "      FragColor = vec4(col, 1.0);\n"
+                             "   }\n"
+                             "   else\n"
+                             "   {\n"
+                             "      FragColor = ourColor;\n"
+                             "   }\n"
+                             "}\n";
 }
 
 Demo2dShapes::~Demo2dShapes() {}
@@ -113,8 +128,8 @@ void Demo2dShapes::initializeGraphics()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
@@ -124,10 +139,14 @@ void Demo2dShapes::renderGraphics()
     glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // draw our shape
-    glUseProgram(m_ShaderProgram);
-    int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
-    glUniform4f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z, m_Color.w);
+    if (m_Wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     // move and rotate our shape
     glm::mat4 m_Trans = glm::mat4(1.0f);
@@ -137,8 +156,19 @@ void Demo2dShapes::renderGraphics()
     m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
     m_Trans = glm::rotate(m_Trans, glm::radians(m_ShapeRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    unsigned int transformLoc = glGetUniformLocation(m_ShaderProgram, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(m_Trans));
+    glUseProgram(m_ShaderProgram);
+    int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
+    int transformLocation = glGetUniformLocation(m_ShaderProgram, "transform");
+    int timeLocation = glGetUniformLocation(m_ShaderProgram, "time");
+    int resolutionLocation = glGetUniformLocation(m_ShaderProgram, "resolution");
+    int colorRandomLocation = glGetUniformLocation(m_ShaderProgram, "multicolor");
+
+    float time = SDL_GetTicks() / 1000.0f;
+    glUniform4f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z, m_Color.w);
+    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(m_Trans));
+    glUniform1f(timeLocation, time);
+    glUniform2f(resolutionLocation, (float)context::windowWidth, (float)context::windowHeight);
+    glUniform1i(colorRandomLocation, m_Multicolor);
 
     // Update selected shape
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
@@ -147,7 +177,7 @@ void Demo2dShapes::renderGraphics()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(unsigned int), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
-    glBindVertexArray(m_VAO); // sehexagon we only have a single m_VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+    glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
 }
 
@@ -170,11 +200,12 @@ void Demo2dShapes::renderInterface()
             ImGui::SeparatorText("Parameters");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
+            ImGui::Checkbox("Multicolor", &m_Multicolor);
 
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
 
-            ImGui::SeparatorText("Shape Selection");
+            ImGui::SeparatorText("Shape selection");
             if (ImGui::BeginCombo(" ", comboPreviewValue, flags))
             {
                 for (int n = 0; n < m_ShapeNames.size(); n++)
@@ -196,11 +227,13 @@ void Demo2dShapes::renderInterface()
             ImGui::SliderFloat("x rotation", &m_ShapeRot.x, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("y rotation", &m_ShapeRot.y, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("z rotation", &m_ShapeRot.z, 0.0f, 360.0f, "%.3f");
+            ImGui::SeparatorText("Polygon mode");
+            ImGui::Checkbox("Wireframe", &m_Wireframe);
 
+            ImGui::Separator();
             if (ImGui::Button("Reset"))
             {
-                m_ShapePos = glm::vec2(0.0f, 0.0f);
-                m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+                resetParameters();
             }
             ImGui::EndTabItem();
         }
@@ -235,8 +268,17 @@ void Demo2dShapes::deallocateGraphicsData()
     glDeleteProgram(m_ShaderProgram);
 }
 
+void Demo2dShapes::resetParameters()
+{
+    m_ShapePos = glm::vec2(0.0f, 0.0f);
+    m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_Wireframe = false;
+    m_Multicolor = false;
+}
+
 void Demo2dShapes::startNextDemo()
 {
+    resetParameters();
     DemoManager::triggerNext();
 }
 
@@ -248,6 +290,7 @@ void Demo2dShapes::run()
     {
         App::processEvents();
 
+        // randomizeColor();
         renderInterface();
         renderGraphics();
 

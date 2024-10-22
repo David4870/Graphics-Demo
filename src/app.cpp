@@ -11,7 +11,7 @@
 #include "demoManager.hpp"
 #include "demo2dShapes.hpp"
 #include "initTerminate.hpp"
-#include "polygon.hpp"
+#include "shapes/shapes.hpp"
 
 App::App()
 {
