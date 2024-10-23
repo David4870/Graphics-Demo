@@ -12,6 +12,7 @@
 #include "demoManager.hpp"
 #include "demo3dShapes.hpp"
 #include "shapes/shapes.hpp"
+#include "shader.hpp"
 
 Demo3dShapes::Demo3dShapes()
 {
@@ -35,33 +36,56 @@ Demo3dShapes::Demo3dShapes()
 
     m_VertexShaderSource = "#version 330 core\n"
                                      "layout (location = 0) in vec3 aPos;\n"
+                                     "layout (location = 1) in vec3 aNormal;\n"
                                      "uniform mat4 model;\n"
                                      "uniform mat4 view;\n"
                                      "uniform mat4 projection;\n"
+                                     "out vec3 FragPos;\n"
+                                     "out vec3 Normal;\n"
                                      "void main()\n"
                                      "{\n"
                                      "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+                                     "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
+                                     "   Normal = mat3(transpose(inverse(model))) * aNormal;\n"
                                      "}\0";
 
     m_FragmentShaderSource = "#version 330 core\n"
+                             "in vec3 FragPos;\n"
+                             "in vec3 Normal;\n"
                              "out vec4 FragColor;\n"
-                             "uniform vec4 ourColor;\n"
+                             "uniform vec3 ourColor;\n"
+                             "uniform vec3 lightColor;\n"
+                             "uniform vec3 lightPos;\n"
                              "uniform vec2 resolution;\n"
                              "uniform float time;\n"
                              "uniform bool multicolor;\n"
                              "void main()\n"
                              "{\n"
+                             "   vec3 norm = normalize(Normal);\n"
+                             "   vec3 lightDir = normalize(lightPos - FragPos);\n"
+                             "   float diff = max(dot(norm, lightDir), 0.0);\n"
+                             "   vec3 diffuse = diff * lightColor;\n"
+                             "   float ambientStrength = 0.1;\n"
+                             "   vec3 ambient = ambientStrength * lightColor;\n"
+                             "   vec3 result = (ambient + diffuse) * ourColor;\n"
                              "   vec2 uv = gl_FragCoord.xy / resolution;\n"
                              "   vec3 col = 0.5 + 0.5 * cos(time * 2.0 + uv.xyx * 5.0 + vec3(0.0, 2.0, 4.0));\n"
                              "   if (multicolor)\n"
                              "   {\n"
-                             "      FragColor = vec4(col, 1.0);\n"
+                             "      FragColor = vec4((ambient + diffuse) * col, 1.0);\n"
                              "   }\n"
                              "   else\n"
                              "   {\n"
-                             "      FragColor = ourColor;\n"
+                             "      FragColor = vec4(result, 1.0);\n"
                              "   }\n"
                              "}\n";
+
+    m_FragmentShaderLightSource = "#version 330 core\n"
+                                  "out vec4 FragColor;\n"
+                                  "void main()\n"
+                                  "{\n"
+                                  "FragColor = vec4(1.0);\n"
+                                  "}\n";
 }
 
 Demo3dShapes::~Demo3dShapes() {}
@@ -70,51 +94,23 @@ void Demo3dShapes::processEvents() {}
 
 void Demo3dShapes::initializeGraphics()
 {
-    // vertex shader
-    m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(m_VertexShader, 1, &m_VertexShaderSource, NULL);
-    glCompileShader(m_VertexShader);
-    // check for shader compile errors
-    int success;
-    char infoLog[512];
-    glGetShaderiv(m_VertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(m_VertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-    // fragment shader
-    m_FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(m_FragmentShader, 1, &m_FragmentShaderSource, NULL);
-    glCompileShader(m_FragmentShader);
-    // check for shader compile errors
-    glGetShaderiv(m_FragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(m_FragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-    // link shaders
-    m_ShaderProgram = glCreateProgram();
-    glAttachShader(m_ShaderProgram, m_VertexShader);
-    glAttachShader(m_ShaderProgram, m_FragmentShader);
-    glLinkProgram(m_ShaderProgram);
-    // check for linking errors
-    glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(m_ShaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                  << infoLog << std::endl;
-    }
+    m_VertexShader = createVertexShader(m_VertexShaderSource);
+    m_FragmentShader = createFragmentShader(m_FragmentShaderSource);
+    m_FragmentShaderLight = createFragmentShader(m_FragmentShaderLightSource);
+
+    m_ShaderProgram = createShaderProgram(m_VertexShader, m_FragmentShader);
+    m_ShaderProgramLight = createShaderProgram(m_VertexShader, m_FragmentShaderLight);
+
     glDeleteShader(m_VertexShader);
     glDeleteShader(m_FragmentShader);
+    glDeleteShader(m_FragmentShaderLight);
 
     glGenVertexArrays(1, &m_VAO);
+    glGenVertexArrays(1, &m_lightVAO);
     glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_lightVBO);
     glGenBuffers(1, &m_EBO);
+    glGenBuffers(1, &m_lightEBO);
 
     glBindVertexArray(m_VAO);
 
@@ -124,8 +120,18 @@ void Demo3dShapes::initializeGraphics()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(float), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(m_lightVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_lightVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_Polygons[2].vertices.size() * sizeof(float), m_Polygons[2].vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lightEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[2].indices.size() * sizeof(float), m_Polygons[2].indices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
@@ -167,11 +173,13 @@ void Demo3dShapes::renderGraphics()
     // note that we're translating the scene in the reverse direction of where we want to move
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-    glm::mat4 projection;
+    glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), 1520.0f / 1080.0f, 0.1f, 100.0f);
 
     glUseProgram(m_ShaderProgram);
     int vertexColorLocation = glGetUniformLocation(m_ShaderProgram, "ourColor");
+    int lightColorLocation = glGetUniformLocation(m_ShaderProgram, "lightColor");
+    int lightPosLocation= glGetUniformLocation(m_ShaderProgram, "lightPos");
     int timeLocation = glGetUniformLocation(m_ShaderProgram, "time");
     int resolutionLocation = glGetUniformLocation(m_ShaderProgram, "resolution");
     int colorRandomLocation = glGetUniformLocation(m_ShaderProgram, "multicolor");
@@ -180,7 +188,9 @@ void Demo3dShapes::renderGraphics()
     int projectionLoc = glGetUniformLocation(m_ShaderProgram, "projection");
 
     float time = SDL_GetTicks() / 1000.0f;
-    glUniform4f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z, m_Color.w);
+    glUniform3f(vertexColorLocation, m_Color.x, m_Color.y, m_Color.z);
+    glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
+    glUniform3f(lightPosLocation, m_lightPos.x, m_lightPos.y, m_lightPos.z);
     glUniform1f(timeLocation, time);
     glUniform2f(resolutionLocation, (float)context::windowWidth, (float)context::windowHeight);
     glUniform1i(colorRandomLocation, m_Multicolor);
@@ -189,14 +199,40 @@ void Demo3dShapes::renderGraphics()
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     // Update selected shape
+    glBindVertexArray(m_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, m_Polygons[m_SelectedShape].vertices.size() * sizeof(float), m_Polygons[m_SelectedShape].vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(unsigned int), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
-    glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+    glUseProgram(m_ShaderProgramLight);
+    glBindVertexArray(m_lightVAO);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, m_lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));
+
+    view = glm::mat4(1.0f);
+    // note that we're translating the scene in the reverse direction of where we want to move
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    projection = glm::mat4(1.0f);
+    projection = glm::perspective(glm::radians(45.0f), 1520.0f / 1080.0f, 0.1f, 100.0f);
+
+    int modelLocLight = glGetUniformLocation(m_ShaderProgramLight, "model");
+    int viewLocLight = glGetUniformLocation(m_ShaderProgramLight, "view");
+    int projectionLocLight = glGetUniformLocation(m_ShaderProgramLight, "projection");
+
+    glUniformMatrix4fv(modelLocLight, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLocLight, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionLocLight, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[2].indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
 }
 
 void Demo3dShapes::renderInterface()
@@ -269,6 +305,14 @@ void Demo3dShapes::renderInterface()
                 ImGui::EndDisabled();
             }
 
+            // TODO: rename the lables
+            // the lables collided with shape pos labels thus changing both values.
+            // I had an aneurysm fixing this.
+            ImGui::SeparatorText("Light position");
+            ImGui::SliderFloat("xl position", &m_lightPos.x, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("yl position", &m_lightPos.y, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("zl position", &m_lightPos.z, -1.0f, 1.0f, "%.3f");
+
             ImGui::SeparatorText("Polygon mode");
             ImGui::Checkbox("Wireframe", &m_Wireframe);
 
@@ -297,15 +341,20 @@ void Demo3dShapes::renderInterface()
 void Demo3dShapes::deallocateGraphicsData()
 {
     glDeleteVertexArrays(1, &m_VAO);
+    glDeleteVertexArrays(1, &m_lightVAO);
     glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_lightVBO);
     glDeleteBuffers(1, &m_EBO);
+    glDeleteBuffers(1, &m_lightEBO);
     glDeleteProgram(m_ShaderProgram);
+    glDeleteProgram(m_ShaderProgramLight);
 }
 
 void Demo3dShapes::resetParameters()
 {
     m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_lightPos = glm::vec3(0.0f, 1.0f, 1.0f);
     m_Wireframe = false;
     m_Multicolor = false;
 }
