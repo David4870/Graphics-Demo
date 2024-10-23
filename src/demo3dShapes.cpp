@@ -80,7 +80,7 @@ Demo3dShapes::Demo3dShapes()
                              "   vec3 ambient = ambientStrength * lightColor;\n"
                              "   float specularStrength = 0.5;\n"
                              "   vec3 viewDir = normalize(viewPos - FragPos);\n"
-                             "   vec3 reflectDir = reflect(-lightDir, norm);\n"
+                             "   vec3 reflectDir = reflect(lightDir, norm);\n"
                              "   float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n"
                              "   vec3 specular = specularStrength * spec * lightColor;\n"
                              "   vec3 result = (ambient + diffuse + specular) * ourColor;\n"
