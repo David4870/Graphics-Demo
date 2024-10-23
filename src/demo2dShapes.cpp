@@ -22,7 +22,7 @@ Demo2dShapes::Demo2dShapes()
     m_Multicolor = false;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
-    m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
+    m_Color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
 
     m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -209,10 +209,12 @@ void Demo2dShapes::renderInterface()
         if (ImGui::BeginTabItem("2D Shapes"))
         {
             ImGui::Text("This is the 2D Shapes tab!\nblah blah blah blah blah");
-            ImGui::SeparatorText("Parameters");
+            ImGui::Spacing();
+            ImGui::SeparatorText("Color");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
             ImGui::Checkbox("Multicolor", &m_Multicolor);
+            ImGui::Spacing();
 
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
@@ -231,16 +233,22 @@ void Demo2dShapes::renderInterface()
                 }
                 ImGui::EndCombo();
             }
+            ImGui::Spacing();
+
             ImGui::SeparatorText("Position");
             ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("y position", &m_ShapePos.y, -1.0f, 1.0f, "%.3f");
+            ImGui::Spacing();
 
             ImGui::SeparatorText("Rotation");
             ImGui::SliderFloat("x rotation", &m_ShapeRot.x, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("y rotation", &m_ShapeRot.y, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("z rotation", &m_ShapeRot.z, 0.0f, 360.0f, "%.3f");
+            ImGui::Spacing();
+
             ImGui::SeparatorText("Polygon mode");
             ImGui::Checkbox("Wireframe", &m_Wireframe);
+            ImGui::Spacing();
 
             ImGui::Separator();
             if (ImGui::Button("Reset"))

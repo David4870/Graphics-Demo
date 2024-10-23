@@ -16,14 +16,17 @@
 
 Demo3dShapes::Demo3dShapes()
 {
-    m_ShapeNames = {"Cube", "Cylinder", "Sphere", "Torus"};
+    m_ShapeNames = { "Cube", "Tetrahedron", "Prism", "Cylinder", "Sphere", "High-Res Sphere", "Torus", "High-Res Torus" };
     m_SelectedShape = 0;
+    m_autoRotate = false;
+    m_autoRotSpeed = 50;
+    m_tmpRotSpeed = 50;
     m_Wireframe = false;
     m_Multicolor = false;
     m_lighting = true;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
-    m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
+    m_Color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
 
     m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -31,9 +34,13 @@ Demo3dShapes::Demo3dShapes()
 
     m_Polygons = {
         prismCreate(0.5f, 0.5f, 0.7f, 4, 1, false, 2),      // Cube
+        coneCreate(0.5f, 0.5f, 3, 1, false, 2),             // Tetrahedron
+        prismCreate(0.5f, 0.5f, 1.0f, 3, 1, false, 2),      // Prism
         prismCreate(0.5f, 0.5f, 1.0f, 100, 1, false, 2),    // Cylinder
-        sphereCreate(0.5, 36, 18, false, 2),                // Sphere
-        torusCreate(0.5f, 0.25f, 36, 18, false, 2)          // Torus
+        sphereCreate(0.5f, 36, 18, false, 2),               // Sphere
+        sphereCreate(0.5f, 200, 200, false, 2),             // High-Res Sphere
+        torusCreate(0.5f, 0.25f, 36, 18, false, 2),         // Torus
+        torusCreate(0.5f, 0.25f, 200, 200, false, 2)        // High-Res Torus
     };
 
     m_VertexShaderSource = "#version 330 core\n"
@@ -137,18 +144,18 @@ void Demo3dShapes::initializeGraphics()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[m_SelectedShape].indices.size() * sizeof(float), m_Polygons[m_SelectedShape].indices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(m_lightVAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_lightVBO);
-    glBufferData(GL_ARRAY_BUFFER, m_Polygons[2].vertices.size() * sizeof(float), m_Polygons[2].vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_Polygons[4].vertices.size() * sizeof(float), m_Polygons[4].vertices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lightEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[2].indices.size() * sizeof(float), m_Polygons[2].indices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Polygons[4].indices.size() * sizeof(float), m_Polygons[4].indices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
@@ -251,7 +258,7 @@ void Demo3dShapes::renderGraphics()
         glUniformMatrix4fv(viewLocLight, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLocLight, 1, GL_FALSE, glm::value_ptr(projection));
 
-        glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[2].indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[4].indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
@@ -281,10 +288,12 @@ void Demo3dShapes::renderInterface()
         if (ImGui::BeginTabItem("3D Shapes"))
         {
             ImGui::Text("This is the 3D Shapes tab!\nblah blah blah blah blah");
-            ImGui::SeparatorText("Parameters");
+            ImGui::Spacing();
+            ImGui::SeparatorText("Color");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
             ImGui::Checkbox("Multicolor", &m_Multicolor);
+            ImGui::Spacing();
 
             const char *comboPreviewValue = m_ShapeNames[m_SelectedShape];
             static ImGuiComboFlags flags = 0;
@@ -303,15 +312,21 @@ void Demo3dShapes::renderInterface()
                 }
                 ImGui::EndCombo();
             }
+            ImGui::Spacing();
 
             ImGui::SeparatorText("Position");
             ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("y position", &m_ShapePos.y, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("z position", &m_ShapePos.z, -1.0f, 1.0f, "%.3f");
+            ImGui::Spacing();
 
             ImGui::SeparatorText("Rotation");
             ImGui::Checkbox("Auto Rotate", &m_autoRotate);
-            ImGui::SliderFloat("Rotation speed", &m_autoRotSpeed, 1.0f, 100.0f, "%0.3f");
+            ImGui::SliderFloat("Rotation speed", &m_tmpRotSpeed, 1.0f, 100.0f, "%0.3f");
+            if(!ImGui::IsItemActive())
+            {
+                m_autoRotSpeed = m_tmpRotSpeed;
+            }
             if (m_autoRotate)
             {
                 ImGui::BeginDisabled(true);
@@ -320,6 +335,7 @@ void Demo3dShapes::renderInterface()
             ImGui::SliderFloat("x rotation", &m_ShapeRot.x, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("y rotation", &m_ShapeRot.y, 0.0f, 360.0f, "%.3f");
             ImGui::SliderFloat("z rotation", &m_ShapeRot.z, 0.0f, 360.0f, "%.3f");
+            ImGui::Spacing();
 
             if (m_autoRotate)
             {
@@ -330,13 +346,11 @@ void Demo3dShapes::renderInterface()
             {
                 ImGui::BeginDisabled(true);
             }
-            // TODO: rename the lables
-            // the lables collided with shape pos labels thus changing both values.
-            // I had an aneurysm fixing this.
             ImGui::SeparatorText("Light position");
-            ImGui::SliderFloat("xl position", &m_lightPos.x, -1.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("yl position", &m_lightPos.y, -1.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("zl position", &m_lightPos.z, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("x position##light", &m_lightPos.x, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("y position##light", &m_lightPos.y, -1.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("z position##light", &m_lightPos.z, -1.0f, 1.0f, "%.3f");
+            ImGui::Spacing();
             if (!m_lighting)
             {
                 ImGui::EndDisabled();
@@ -344,9 +358,11 @@ void Demo3dShapes::renderInterface()
 
             ImGui::SeparatorText("Polygon mode");
             ImGui::Checkbox("Wireframe", &m_Wireframe);
+            ImGui::Spacing();
 
             ImGui::SeparatorText("Lighting mode");
             ImGui::Checkbox("Lighting", &m_lighting);
+            ImGui::Spacing();
 
             ImGui::Separator();
             if (ImGui::Button("Reset"))
@@ -387,8 +403,12 @@ void Demo3dShapes::resetParameters()
     m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
     m_lightPos = glm::vec3(0.0f, 1.0f, 1.0f);
+    m_autoRotate = false;
+    m_autoRotSpeed = 50;
+    m_tmpRotSpeed = 50;
     m_Wireframe = false;
     m_Multicolor = false;
+    m_lighting = true;
 }
 
 void Demo3dShapes::startNextDemo()
