@@ -34,7 +34,7 @@ private:
     ImVec4 m_ClearColor;
     ImVec4 m_Color;
 
-    glm::vec2 m_ShapePos;
+    glm::vec3 m_ShapePos;
     glm::vec3 m_ShapeRot;
     glm::mat4 m_Trans;
 
