@@ -68,7 +68,13 @@ FetchContent_Declare(
 	GIT_TAG 	1.0.1
 )
 
-FetchContent_MakeAvailable(SDL3 GLEW IMGUI GLM)
+FetchContent_Declare(
+    STBIMAGE
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_TAG        2e2bef463a5b53ddf8bb788e25da6b8506314c08
+)
+
+FetchContent_MakeAvailable(SDL3 GLEW IMGUI GLM STBIMAGE)
 
 add_subdirectory(${glew_SOURCE_DIR}/build/cmake)
 
@@ -93,6 +99,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${stbimage_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 # Linking
