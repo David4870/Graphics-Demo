@@ -23,7 +23,7 @@ protected:
 
 private:
     std::vector<Polygon> m_Polygons;
-    std::array<const char*, 4> m_ShapeNames;
+    std::array<const char*, 8> m_ShapeNames;
     int m_SelectedShape;
     bool m_Wireframe;
     bool m_Multicolor;
@@ -37,8 +37,9 @@ private:
     glm::vec3 m_ShapeRot;
     glm::mat4 m_Trans;
 
-    bool m_autoRotate = false;
-    float m_autoRotSpeed = 50;
+    bool m_autoRotate;
+    float m_autoRotSpeed;
+    float m_tmpRotSpeed;
 
     const char *m_VertexShaderSource;
     const char *m_FragmentShaderSource;
