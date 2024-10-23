@@ -16,7 +16,6 @@ public:
 
 protected:
     void initializeGraphics() override;
-    void HelpMarker();
     void renderGraphics() override;
     void renderInterface() override;
     void deallocateGraphicsData() override;
