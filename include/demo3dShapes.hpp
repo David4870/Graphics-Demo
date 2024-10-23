@@ -27,11 +27,12 @@ private:
     int m_SelectedShape;
     bool m_Wireframe;
     bool m_Multicolor;
+    bool m_lighting;
 
     ImVec4 m_ClearColor;
     ImVec4 m_Color;
 
-    glm::vec3 m_lightPos = glm::vec3(0.0f, 1.0f, 1.0f);
+    glm::vec3 m_lightPos;
     glm::vec3 m_ShapePos;
     glm::vec3 m_ShapeRot;
     glm::mat4 m_Trans;

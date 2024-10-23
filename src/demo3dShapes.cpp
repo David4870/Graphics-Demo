@@ -20,12 +20,14 @@ Demo3dShapes::Demo3dShapes()
     m_SelectedShape = 0;
     m_Wireframe = false;
     m_Multicolor = false;
+    m_lighting = true;
 
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_Color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
 
     m_ShapePos = glm::vec3(0.0f, 0.0f, 0.0f);
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_lightPos = glm::vec3(0.0f, 1.0f, 1.0f);
 
     m_Polygons = {
         prismCreate(0.5f, 0.5f, 0.7f, 4, 1, false, 2),      // Cube
@@ -59,6 +61,7 @@ Demo3dShapes::Demo3dShapes()
                              "uniform vec2 resolution;\n"
                              "uniform float time;\n"
                              "uniform bool multicolor;\n"
+                             "uniform bool lighting;\n"
                              "void main()\n"
                              "{\n"
                              "   vec3 norm = normalize(Normal);\n"
@@ -70,22 +73,36 @@ Demo3dShapes::Demo3dShapes()
                              "   vec3 result = (ambient + diffuse) * ourColor;\n"
                              "   vec2 uv = gl_FragCoord.xy / resolution;\n"
                              "   vec3 col = 0.5 + 0.5 * cos(time * 2.0 + uv.xyx * 5.0 + vec3(0.0, 2.0, 4.0));\n"
-                             "   if (multicolor)\n"
+                             "   if (lighting)\n"
                              "   {\n"
-                             "      FragColor = vec4((ambient + diffuse) * col, 1.0);\n"
+                             "      if (multicolor)\n"
+                             "      {\n"
+                             "         FragColor = vec4((ambient + diffuse) * col, 1.0);\n"
+                             "      }\n"
+                             "      else\n"
+                             "      {\n"
+                             "         FragColor = vec4(result, 1.0);\n"
+                             "      }\n"
                              "   }\n"
                              "   else\n"
                              "   {\n"
-                             "      FragColor = vec4(result, 1.0);\n"
+                             "      if (multicolor)\n"
+                             "      {\n"
+                             "         FragColor = vec4(col, 1.0);\n"
+                             "      }\n"
+                             "      else\n"
+                             "      {\n"
+                             "         FragColor = vec4(ourColor, 1.0);\n"
+                             "      }\n"
                              "   }\n"
-                             "}\n";
+                             "}\0";
 
     m_FragmentShaderLightSource = "#version 330 core\n"
                                   "out vec4 FragColor;\n"
                                   "void main()\n"
                                   "{\n"
                                   "FragColor = vec4(1.0);\n"
-                                  "}\n";
+                                  "}\0";
 }
 
 Demo3dShapes::~Demo3dShapes() {}
@@ -183,6 +200,7 @@ void Demo3dShapes::renderGraphics()
     int timeLocation = glGetUniformLocation(m_ShaderProgram, "time");
     int resolutionLocation = glGetUniformLocation(m_ShaderProgram, "resolution");
     int colorRandomLocation = glGetUniformLocation(m_ShaderProgram, "multicolor");
+    int lightingBoolLocation = glGetUniformLocation(m_ShaderProgram, "lighting");
     int modelLoc = glGetUniformLocation(m_ShaderProgram, "model");
     int viewLoc = glGetUniformLocation(m_ShaderProgram, "view");
     int projectionLoc = glGetUniformLocation(m_ShaderProgram, "projection");
@@ -194,6 +212,7 @@ void Demo3dShapes::renderGraphics()
     glUniform1f(timeLocation, time);
     glUniform2f(resolutionLocation, (float)context::windowWidth, (float)context::windowHeight);
     glUniform1i(colorRandomLocation, m_Multicolor);
+    glUniform1i(lightingBoolLocation, m_lighting);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -209,30 +228,32 @@ void Demo3dShapes::renderGraphics()
     glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
-    glUseProgram(m_ShaderProgramLight);
-    glBindVertexArray(m_lightVAO);
+    if (m_lighting)
+    {
+        glUseProgram(m_ShaderProgramLight);
+        glBindVertexArray(m_lightVAO);
 
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, m_lightPos);
-    model = glm::scale(model, glm::vec3(0.2f));
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, m_lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
 
-    view = glm::mat4(1.0f);
-    // note that we're translating the scene in the reverse direction of where we want to move
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), 1520.0f / 1080.0f, 0.1f, 100.0f);
+        view = glm::mat4(1.0f);
+        // note that we're translating the scene in the reverse direction of where we want to move
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::mat4(1.0f);
+        projection = glm::perspective(glm::radians(45.0f), 1520.0f / 1080.0f, 0.1f, 100.0f);
 
-    int modelLocLight = glGetUniformLocation(m_ShaderProgramLight, "model");
-    int viewLocLight = glGetUniformLocation(m_ShaderProgramLight, "view");
-    int projectionLocLight = glGetUniformLocation(m_ShaderProgramLight, "projection");
+        int modelLocLight = glGetUniformLocation(m_ShaderProgramLight, "model");
+        int viewLocLight = glGetUniformLocation(m_ShaderProgramLight, "view");
+        int projectionLocLight = glGetUniformLocation(m_ShaderProgramLight, "projection");
 
-    glUniformMatrix4fv(modelLocLight, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLocLight, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projectionLocLight, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(modelLocLight, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLocLight, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLocLight, 1, GL_FALSE, glm::value_ptr(projection));
 
-    glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[2].indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-
+        glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[2].indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }
 
 void Demo3dShapes::renderInterface()
@@ -305,6 +326,10 @@ void Demo3dShapes::renderInterface()
                 ImGui::EndDisabled();
             }
 
+            if (!m_lighting)
+            {
+                ImGui::BeginDisabled(true);
+            }
             // TODO: rename the lables
             // the lables collided with shape pos labels thus changing both values.
             // I had an aneurysm fixing this.
@@ -312,9 +337,16 @@ void Demo3dShapes::renderInterface()
             ImGui::SliderFloat("xl position", &m_lightPos.x, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("yl position", &m_lightPos.y, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("zl position", &m_lightPos.z, -1.0f, 1.0f, "%.3f");
+            if (!m_lighting)
+            {
+                ImGui::EndDisabled();
+            }
 
             ImGui::SeparatorText("Polygon mode");
             ImGui::Checkbox("Wireframe", &m_Wireframe);
+
+            ImGui::SeparatorText("Lighting mode");
+            ImGui::Checkbox("Lighting", &m_lighting);
 
             ImGui::Separator();
             if (ImGui::Button("Reset"))
