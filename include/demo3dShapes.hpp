@@ -28,6 +28,7 @@ private:
     bool m_Wireframe;
     bool m_Multicolor;
     bool m_lighting;
+    bool m_specularOn;
 
     ImVec4 m_ClearColor;
     ImVec4 m_Color;
@@ -52,5 +53,6 @@ private:
 
     unsigned int m_VBO, m_lightVBO, m_VAO, m_lightVAO, m_EBO, m_lightEBO;
 
+    void helpMarker(const char* desc);
     void resetParameters();
 };
