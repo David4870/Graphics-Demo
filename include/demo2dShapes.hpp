@@ -28,8 +28,15 @@ private:
     std::vector<Polygon> m_Polygons;
     std::array<const char*, 6> m_ShapeNames;
     int m_SelectedShape;
+
+    std::vector<unsigned int> m_Textures;
+    std::array<const char*, 3> m_TextureNames;
+    int m_SelectedTexture;
+
     bool m_Wireframe;
     bool m_Multicolor;
+    bool m_TextureActive;
+    bool m_TexturesLoaded;
 
     ImVec4 m_ClearColor;
     ImVec4 m_Color;

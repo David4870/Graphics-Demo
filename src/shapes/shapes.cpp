@@ -18,6 +18,8 @@ Polygon polygon2dCreate(float n, float a, float b, float r)
     vertices.push_back(0.0f);
     vertices.push_back(0.0f);
     vertices.push_back(0.0f);
+    vertices.push_back(0.5f);
+    vertices.push_back(0.5f);
 
     for (int i = 0; i < n; i++)
     {
@@ -25,6 +27,12 @@ Polygon polygon2dCreate(float n, float a, float b, float r)
         vertices.push_back(a + r * cos(theta));
         vertices.push_back(b + r * sin(theta));
         vertices.push_back(0.0f);
+
+        float u = 0.5f + 0.5f * cos(theta);
+        float v = 0.5f + 0.5f * sin(theta);
+
+        vertices.push_back(u);
+        vertices.push_back(v);
     }
 
     for (int i = 0; i < n; i++)
