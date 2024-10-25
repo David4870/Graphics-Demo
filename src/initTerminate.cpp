@@ -37,6 +37,7 @@ void initializeImGui()
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.IniFilename = nullptr;
 
     ImGui::StyleColorsDark();
 
