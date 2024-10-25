@@ -5,6 +5,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+set(PROJECT_COMPILE_DEFINITIONS -static)
+set(RELEASE_BUILD_TYPES "Release;MinSizeRel")
+if(CMAKE_BUILD_TYPE IN_LIST RELEASE_BUILD_TYPES)
+    list(APPEND PROJECT_COMPILE_DEFINITIONS -mwindows)
+endif()
+
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(ARCHITECTURE x64)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -101,6 +107,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${stbimage_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+target_link_options(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_DEFINITIONS})
 
 # Linking
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_LIBRARIES})
