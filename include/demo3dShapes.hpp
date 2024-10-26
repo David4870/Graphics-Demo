@@ -54,6 +54,6 @@ private:
 
     unsigned int m_VBO, m_lightVBO, m_VAO, m_lightVAO, m_EBO, m_lightEBO;
 
-    void helpMarker(const char* desc);
+    void SetHelpMarker(const char* desc);
     void resetParameters();
 };

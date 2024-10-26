@@ -54,5 +54,6 @@ private:
 
     unsigned int m_VBO, m_VAO, m_EBO;
 
+    void SetHelpMarker(const char* desc);
     void resetParameters();
 };

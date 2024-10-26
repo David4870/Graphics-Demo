@@ -288,18 +288,6 @@ void Demo3dShapes::renderGraphics()
     }
 }
 
-void Demo3dShapes::helpMarker(const char* desc)
-{
-    ImGui::TextDisabled("(?)");
-    if (ImGui::BeginItemTooltip())
-    {
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(desc);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-
 void Demo3dShapes::renderInterface()
 {
     App::startImGuiFrame();
@@ -331,7 +319,7 @@ void Demo3dShapes::renderInterface()
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
             ImGui::Checkbox("Multicolor", &m_Multicolor);
             ImGui::SetItemTooltip(
-                "Enable and disable multicolor mode.\n"
+                "Enable or disable multicolor mode.\n"
                 "Cycles through all the RGB colors.");
             ImGui::Spacing();
 
@@ -355,14 +343,12 @@ void Demo3dShapes::renderInterface()
             ImGui::Spacing();
 
             ImGui::SeparatorText("Position");
-            ImGui::SetItemTooltip("Adjust the x, y and z values of the shape to changing its position.");
             ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("y position", &m_ShapePos.y, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("z position", &m_ShapePos.z, -1.0f, 1.0f, "%.3f");
             ImGui::Spacing();
 
             ImGui::SeparatorText("Rotation");
-            ImGui::SetItemTooltip("Adjust the x, y and z rotation of the shape to changing its rotation.");
             ImGui::SliderFloat("##rotSpeedSlider", &m_tmpRotSpeed, -100.0f, 100.0f, "%0.3f");
             if(!ImGui::IsItemActive())
             {
@@ -370,7 +356,7 @@ void Demo3dShapes::renderInterface()
             }
             ImGui::SameLine();
             ImGui::Checkbox("Auto Rotate", &m_autoRotate);
-            ImGui::SetItemTooltip("Enable and disable auto rotate. Adjust rotation speed with the slider.");
+            ImGui::SetItemTooltip("Enable and disable auto rotation. Adjust rotation speed with the slider.");
 
             if (m_autoRotate)
             {
@@ -392,7 +378,6 @@ void Demo3dShapes::renderInterface()
                 ImGui::BeginDisabled(true);
             }
             ImGui::SeparatorText("Light position");
-            ImGui::SetItemTooltip("Adjust the x, y and z values of the light source to changing its position.");
             ImGui::SliderFloat("x position##light", &m_lightPos.x, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("y position##light", &m_lightPos.y, -1.0f, 1.0f, "%.3f");
             ImGui::SliderFloat("z position##light", &m_lightPos.z, -1.0f, 1.0f, "%.3f");
@@ -405,8 +390,8 @@ void Demo3dShapes::renderInterface()
             ImGui::SeparatorText("Polygon mode");
             ImGui::Checkbox("Wireframe", &m_Wireframe);
             ImGui::SetItemTooltip(
-                "Enable and disable Wireframe mode.\n"
-                "If enabled, only the indices of the shape are drawn.");
+                "Enable or disable wireframe mode.\n"
+                "If enabled, only the polygon edges are drawn.");
             ImGui::Spacing();
 
             ImGui::SeparatorText("Lighting mode");
@@ -422,10 +407,10 @@ void Demo3dShapes::renderInterface()
                 resetParameters();
             }
             ImGui::SameLine();
-            helpMarker("Reset all parameters to their default value.");
-
+            SetHelpMarker("Reset all parameters to their default value.");
             ImGui::EndTabItem();
         }
+
         if (ImGui::BeginTabItem("Raycast"))
         {
             if (!isTabActive)
@@ -450,6 +435,18 @@ void Demo3dShapes::deallocateGraphicsData()
     glDeleteBuffers(1, &m_lightEBO);
     glDeleteProgram(m_ShaderProgram);
     glDeleteProgram(m_ShaderProgramLight);
+}
+
+void Demo3dShapes::SetHelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::BeginItemTooltip())
+    {
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 void Demo3dShapes::resetParameters()
