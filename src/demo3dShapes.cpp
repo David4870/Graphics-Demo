@@ -16,6 +16,24 @@
 
 Demo3dShapes::Demo3dShapes()
 {
+    m_Description = "The 3D demo represents how shapes with different level\n"
+                    "of detail react to a light source. The shapes can be\n"
+                    "moved around as well as the light source.\n\n"
+                    "Let the shapes auto rotate while changing the light\n"
+                    "source's position and observe which parts of the shape\n"
+                    "are being lit.\n\n";
+
+    m_Polygons = {
+        prismCreate(0.5f, 0.5f, 0.7f, 4, 1, false, 2),      // Cube
+        coneCreate(0.5f, 0.5f, 3, 1, false, 2),             // Tetrahedron
+        prismCreate(0.5f, 0.5f, 1.0f, 3, 1, false, 2),      // Prism
+        prismCreate(0.5f, 0.5f, 1.0f, 100, 1, false, 2),    // Cylinder
+        sphereCreate(0.5f, 36, 18, false, 2),               // Sphere
+        sphereCreate(0.5f, 200, 200, false, 2),             // High-Res Sphere
+        torusCreate(0.5f, 0.25f, 36, 18, false, 2),         // Torus
+        torusCreate(0.5f, 0.25f, 200, 200, false, 2)        // High-Res Torus
+    };
+
     m_ShapeNames = { "Cube", "Tetrahedron", "Prism", "Cylinder", "Sphere", "High-Res Sphere", "Torus", "High-Res Torus" };
     m_SelectedShape = 0;
     m_autoRotate = false;
@@ -33,31 +51,20 @@ Demo3dShapes::Demo3dShapes()
     m_ShapeRot = glm::vec3(0.0f, 0.0f, 0.0f);
     m_lightPos = glm::vec3(0.0f, 1.0f, 1.0f);
 
-    m_Polygons = {
-        prismCreate(0.5f, 0.5f, 0.7f, 4, 1, false, 2),      // Cube
-        coneCreate(0.5f, 0.5f, 3, 1, false, 2),             // Tetrahedron
-        prismCreate(0.5f, 0.5f, 1.0f, 3, 1, false, 2),      // Prism
-        prismCreate(0.5f, 0.5f, 1.0f, 100, 1, false, 2),    // Cylinder
-        sphereCreate(0.5f, 36, 18, false, 2),               // Sphere
-        sphereCreate(0.5f, 200, 200, false, 2),             // High-Res Sphere
-        torusCreate(0.5f, 0.25f, 36, 18, false, 2),         // Torus
-        torusCreate(0.5f, 0.25f, 200, 200, false, 2)        // High-Res Torus
-    };
-
     m_VertexShaderSource = "#version 330 core\n"
-                                     "layout (location = 0) in vec3 aPos;\n"
-                                     "layout (location = 1) in vec3 aNormal;\n"
-                                     "uniform mat4 model;\n"
-                                     "uniform mat4 view;\n"
-                                     "uniform mat4 projection;\n"
-                                     "out vec3 FragPos;\n"
-                                     "out vec3 Normal;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-                                     "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
-                                     "   Normal = mat3(transpose(inverse(model))) * aNormal;\n"
-                                     "}\0";
+                           "layout (location = 0) in vec3 aPos;\n"
+                           "layout (location = 1) in vec3 aNormal;\n"
+                           "uniform mat4 model;\n"
+                           "uniform mat4 view;\n"
+                           "uniform mat4 projection;\n"
+                           "out vec3 FragPos;\n"
+                           "out vec3 Normal;\n"
+                           "void main()\n"
+                           "{\n"
+                           "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+                           "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
+                           "   Normal = mat3(transpose(inverse(model))) * aNormal;\n"
+                           "}\0";
 
     m_FragmentShaderSource = "#version 330 core\n"
                              "in vec3 FragPos;\n"
@@ -317,7 +324,7 @@ void Demo3dShapes::renderInterface()
         }
         if (ImGui::BeginTabItem("3D Shapes"))
         {
-            ImGui::Text("This is the 3D Shapes tab!\nblah blah blah blah blah");
+            ImGui::Text(m_Description);
             ImGui::Spacing();
             ImGui::SeparatorText("Color");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
