@@ -254,6 +254,9 @@ void Demo2dShapes::renderInterface()
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;
             ImGui::ColorPicker4("Shape Color", (float *)&m_Color, flags);
             ImGui::Checkbox("Multicolor", &m_Multicolor);
+            ImGui::SetItemTooltip(
+                "Enable or disable multicolor mode.\n"
+                "Cycles through all the RGB colors.");
             ImGui::Spacing();
 
             const char *comboPreviewValueShape = m_ShapeNames[m_SelectedShape];
@@ -302,6 +305,7 @@ void Demo2dShapes::renderInterface()
 
             ImGui::SameLine();
             ImGui::Checkbox("Texture", &m_TextureActive);
+            ImGui::SetItemTooltip("Render the currently active texture.");
 
             ImGui::SeparatorText("Position");
             ImGui::SliderFloat("x position", &m_ShapePos.x, -1.0f, 1.0f, "%.3f");
@@ -316,6 +320,9 @@ void Demo2dShapes::renderInterface()
 
             ImGui::SeparatorText("Polygon mode");
             ImGui::Checkbox("Wireframe", &m_Wireframe);
+            ImGui::SetItemTooltip(
+                "Enable or disable wireframe mode.\n"
+                "If enabled, only the polygon edges are drawn.");
             ImGui::Spacing();
 
             ImGui::Separator();
@@ -323,8 +330,11 @@ void Demo2dShapes::renderInterface()
             {
                 resetParameters();
             }
+            ImGui::SameLine();
+            SetHelpMarker("Reset all parameters to their default value.");
             ImGui::EndTabItem();
         }
+
         static bool isTabActive = false;
         if (ImGui::BeginTabItem("3D Shapes"))
         {
@@ -354,6 +364,18 @@ void Demo2dShapes::deallocateGraphicsData()
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
     glDeleteProgram(m_ShaderProgram);
+}
+
+void Demo2dShapes::SetHelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::BeginItemTooltip())
+    {
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 void Demo2dShapes::resetParameters()
