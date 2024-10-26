@@ -16,6 +16,12 @@
 
 Demo2dShapes::Demo2dShapes()
 {
+    m_Description = "This demo offers a selection of multiple 2D shapes\n"
+                    "to choose from. Play around with the position and\n"
+                    "rotation parameters to see how these shapes behave in\n"
+                    "a 3D space. Combine options like texture and multicolor\n"
+                    "and see what kind of result they produce.\n\n";
+
     m_Polygons = {
         polygon2dCreate(3.0f, 0.0f, 0.0f, 0.75f),
         polygon2dCreate(4.0f, 0.0f, 0.0f, 0.75f),
@@ -242,7 +248,7 @@ void Demo2dShapes::renderInterface()
     {
         if (ImGui::BeginTabItem("2D Shapes"))
         {
-            ImGui::Text("This is the 2D Shapes tab!\nblah blah blah blah blah");
+            ImGui::Text(m_Description);
             ImGui::Spacing();
             ImGui::SeparatorText("Color");
             ImGuiColorEditFlags colorflags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex;

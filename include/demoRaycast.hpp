@@ -13,6 +13,22 @@
 class DemoRaycast : public Demo
 {
 public:
+
+    DemoRaycast();
+    ~DemoRaycast();
+
+    void processEvents() override;
+    void run() override;
+
+protected:
+    void initializeGraphics() override;
+    void renderGraphics() override;
+    void renderInterface() override;
+    void deallocateGraphicsData() override;
+    void startNextDemo() override;
+
+private:
+    const char *m_Description;
     ImVec4 m_ClearColor;
     ImVec4 m_SouthNorthColor;
     ImVec4 m_EastWestColor;
@@ -36,20 +52,6 @@ public:
     unsigned int m_ShaderProgram;
     unsigned int m_VBO, m_VAO;
 
-    DemoRaycast();
-    ~DemoRaycast();
-
-    void processEvents() override;
-    void run() override;
-
-protected:
-    void initializeGraphics() override;
-    void renderGraphics() override;
-    void renderInterface() override;
-    void deallocateGraphicsData() override;
-    void startNextDemo() override;
-
-private:
     void loadMaps();
     void checkShaderCompilation(unsigned int intshader);
     void checkProgramLinking(unsigned int program);

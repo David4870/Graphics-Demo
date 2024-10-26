@@ -14,6 +14,15 @@
 
 DemoRaycast::DemoRaycast()
 {
+    m_Description = "The target of this demo is to show the result of a\n"
+                    "popular method for creating pseudo 3D worlds.\n\n"
+                    "You can interact with this demo by walking around\n"
+                    "with the WASD keys. Press the space key in order to\n"
+                    "use the mouse in the game scene. Press space again\n"
+                    "to turn this off.\n\n"
+                    "Choose between 3 different maps at the bottom\n"
+                    "of the parameters panel.\n\n";
+
     m_ClearColor = ImVec4(20 / 255.0f, 20 / 255.0f, 20 / 255.0f, 1.00f);
     m_SouthNorthColor = ImVec4(200.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f);
     m_EastWestColor = ImVec4(178.0f / 255.0f, 178.0f / 255.0f, 178.0f / 255.0f, 255.0f / 255.0f);
@@ -364,10 +373,7 @@ void DemoRaycast::renderInterface()
         }
         if (ImGui::BeginTabItem("Raycast"))
         {
-            ImGui::Text("This is the Raycast Demo!");
-            ImGui::NewLine();
-            ImGui::Text("Press WASD to move around. Use your mouse to look around.");
-            ImGui::Text("Press SPACE to toggle RelativeMouseMode.");
+            ImGui::Text(m_Description);
 
             ImGui::SeparatorText("Parameters");
             if (ImGui::CollapsingHeader("Wall Colors", ImGuiTreeNodeFlags_DefaultOpen))

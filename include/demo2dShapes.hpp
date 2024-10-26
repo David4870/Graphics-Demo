@@ -25,6 +25,7 @@ protected:
     void startNextDemo() override;
 
 private:
+    const char *m_Description;
     std::vector<Polygon> m_Polygons;
     std::array<const char*, 6> m_ShapeNames;
     int m_SelectedShape;
