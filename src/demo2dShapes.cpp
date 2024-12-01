@@ -231,6 +231,8 @@ void Demo2dShapes::renderGraphics()
     glBindTexture(GL_TEXTURE_2D, m_Textures[m_SelectedTexture]);
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, m_Polygons[m_SelectedShape].indices.size(), GL_UNSIGNED_INT, 0);
+
+    glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
 
 void Demo2dShapes::renderInterface()
@@ -241,7 +243,7 @@ void Demo2dShapes::renderInterface()
 
     const ImGuiViewport *mainViewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y));
-    ImGui::SetNextWindowSize(ImVec2(400, 1080));
+    ImGui::SetNextWindowSize(ImVec2(400, context::windowHeight));
     ImGui::Begin("DemosAndParameters", nullptr, flags);
     ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("Demos", tabBarFlags))

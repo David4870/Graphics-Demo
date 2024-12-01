@@ -219,8 +219,6 @@ void DemoRaycast::processMouseInput(float xOffset, float deltaTime)
 
 void DemoRaycast::renderScene(int windowWidth, int windowHeight)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-
     glUseProgram(m_ShaderProgram);
     static int counter = 0;
     for (int x = 0; x < windowWidth; x++)
@@ -336,7 +334,9 @@ void DemoRaycast::initializeGraphics()
 void DemoRaycast::renderGraphics()
 {
     glClearColor(m_ClearColor.x * m_ClearColor.w, m_ClearColor.y * m_ClearColor.w, m_ClearColor.z * m_ClearColor.w, m_ClearColor.w);
+    glClear(GL_COLOR_BUFFER_BIT);
     renderScene(context::windowWidth - 400, context::windowHeight);
+    glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
 
 void DemoRaycast::renderInterface()
@@ -349,7 +349,7 @@ void DemoRaycast::renderInterface()
     // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
     const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y));
-    ImGui::SetNextWindowSize(ImVec2(400, 1080));
+    ImGui::SetNextWindowSize(ImVec2(400, context::windowHeight));
     ImGui::Begin("DemosAndParameters", nullptr, flags); // Create the demo selection and parameter window.
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     static bool isTabActive = false;

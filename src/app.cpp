@@ -49,7 +49,7 @@ void App::initialize()
 
     setWindowSize();
 
-    context::window = SDL_CreateWindow("Graphics-Demo", context::windowWidth, context::windowHeight, SDL_WINDOW_OPENGL);
+    context::window = SDL_CreateWindow("Graphics-Demo", context::windowWidth, context::windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (context::window == nullptr) {
         std::cout << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl;
     }
@@ -59,6 +59,8 @@ void App::initialize()
     {
         std::cout << "Error: SDL_GL_CreateContext():" << SDL_GetError() << std::endl;
     }
+
+    context::isWindowFullscreen = false;
 
     initializeGLEW();
     initializeImGui();
@@ -85,6 +87,26 @@ void App::processAppEvents()
     {
         running = false;
     }
+
+    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_F)
+    {
+        if (isWindowFullscreen == false)
+        {
+            isWindowFullscreen = true;
+        }
+        else
+        {
+            isWindowFullscreen = false;
+        }
+
+        SDL_SetWindowFullscreen(window, isWindowFullscreen);
+    }
+
+    if (event.window.type == SDL_EVENT_WINDOW_RESIZED)
+    {
+        windowWidth = event.window.data1;
+        windowHeight = event.window.data2;
+    }
 }
 
 void App::processEvents()
@@ -99,8 +121,6 @@ void App::processEvents()
 
 void App::run()
 {
-    using namespace context;
-
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);

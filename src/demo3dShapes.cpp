@@ -286,6 +286,8 @@ void Demo3dShapes::renderGraphics()
         glDrawElements(GL_TRIANGLES, (unsigned int)m_Polygons[4].indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
+
+    glViewport(400, 0, context::windowWidth - 400, context::windowHeight);
 }
 
 void Demo3dShapes::renderInterface()
